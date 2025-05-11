@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Member List</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    header {
+      background-color: #333;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .logout-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background-color: #d32f2f;
+    }
+    .approve-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .approve-btn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Admin Dashboard</h1>
+</header>
+
+<div class="container">
+  <h2>List of Registered Members</h2>
+  <table id="membersTable">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Role</th>
+        <th>Benefits Status</th>
+        <th>Approve</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dynamic member rows go here -->
+    </tbody>
+  </table>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<!-- Firebase Scripts -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+  import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
+    authDomain: "npwebapp-c9ee3.firebaseapp.com",
+    projectId: "npwebapp-c9ee3",
+    storageBucket: "npwebapp-c9ee3.appspot.com",
+    messagingSenderId: "149339991351",
+    appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
+    measurementId: "G-X761ZGHTSH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Function to load members from Firestore
+  async function loadMembers() {
+    const membersTableBody = document.querySelector("#membersTable tbody");
+    membersTableBody.innerHTML = ""; // Clear old rows
+
+    try {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      querySnapshot.forEach((docSnapshot) => {
+        const data = docSnapshot.data();
+        const row = `
+          <tr>
+            <td>${data.email || ""}</td>
+            <td>${data.firstName || ""}</td>
+            <td>${data.lastName || ""}</td>
+            <td>${data.age || ""}</td>
+            <td>${data.gender || ""}</td>
+            <td>${data.role || "member"}</td>
+            <td>${data.benefitsStatus || "Pending"}</td>
+            <td><button class="approve-btn" onclick="approveBenefit('${docSnapshot.id}')">Approve</button></td>
+          </tr>
+        `;
+        membersTableBody.innerHTML += row;
+      });
+    } catch (error) {
+      alert("Failed to load members: " + error.message);
+    }
+  }
+
+  // Function to approve benefits for a member
+  async function approveBenefit(memberId) {
+    try {
+      const memberRef = doc(db, "users", memberId);
+      await updateDoc(memberRef, {
+        benefitsStatus: "Approved"
+      });
+      alert("Benefit application approved!");
+      loadMembers(); // Reload member list after approval
+    } catch (error) {
+      alert("Failed to approve benefits: " + error.message);
+    }
+  }
+
+  // Logout function
+  function logout() {
+    signOut(auth).then(() => {
+      alert("Logged out");
+      window.location.href = "index.html";
+    }).catch((error) => {
+      alert("Logout failed: " + error.message);
+    });
+  }
+
+  // Load members on page load
+  window.addEventListener("DOMContentLoaded", loadMembers);
+</script>
+
+</body>
+</html>
