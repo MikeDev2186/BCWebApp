@@ -97,8 +97,8 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-  import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+  import { getFirestore, getDocs, collection, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
@@ -131,9 +131,9 @@
     try {
       const querySnapshot = await getDocs(collection(db, "users"));
       allMembers = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        allMembers.push(data);
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        allMembers.push({ ...data, id: docSnap.id });
       });
       renderTable(allMembers);
     } catch (error) {
@@ -144,20 +144,45 @@
 
   function renderTable(members) {
     membersTableBody.innerHTML = "";
-    members.forEach(data => {
+    members.forEach((data) => {
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${data.fullName || ""}</td>
+        <td contenteditable="true">${data.fullName || ""}</td>
         <td>${data.email || ""}</td>
-        <td>${data.phone || ""}</td>
-        <td>${data.address || ""}</td>
-        <td>${data.dob || ""}</td>
-        <td>${data.maritalStatus || ""}</td>
+        <td contenteditable="true">${data.phone || ""}</td>
+        <td contenteditable="true">${data.address || ""}</td>
+        <td contenteditable="true">${data.dob || ""}</td>
+        <td contenteditable="true">${data.maritalStatus || ""}</td>
         <td><ul>${(data.beneficiaries || []).map(b => `<li>${b}</li>`).join("")}</ul></td>
+        <td><button onclick="updateMember(this, '${data.id}')">Update</button></td>
       `;
       membersTableBody.appendChild(row);
     });
   }
+
+  window.updateMember = async function (btn, docId) {
+    const row = btn.closest("tr");
+    const fullName = row.children[0].innerText.trim();
+    const phone = row.children[2].innerText.trim();
+    const address = row.children[3].innerText.trim();
+    const dob = row.children[4].innerText.trim();
+    const maritalStatus = row.children[5].innerText.trim();
+
+    try {
+      const docRef = doc(db, "users", docId);
+      await updateDoc(docRef, {
+        fullName,
+        phone,
+        address,
+        dob,
+        maritalStatus
+      });
+      alert("Member info updated successfully.");
+    } catch (error) {
+      console.error("Error updating document:", error);
+      alert("Failed to update member info.");
+    }
+  };
 
   searchInput.addEventListener("input", () => {
     const keyword = searchInput.value.toLowerCase();
@@ -189,6 +214,7 @@
     document.body.removeChild(link);
   }
 </script>
+
 
 </body>
 </html>
