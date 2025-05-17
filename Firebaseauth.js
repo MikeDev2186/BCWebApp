@@ -1,6 +1,17 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -44,19 +55,18 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
     const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
     const user = signUpResult.user;
 
-    // Set role as 'member' by default
     const role = "member"; 
 
     await setDoc(doc(db, "users", user.uid), {
       email,
       firstName,
       lastName,
-      role // Adding the role to Firestore
+      role
     });
 
     showMessage("Account Created Successfully", "signUpMessage");
     setTimeout(() => {
-      window.location.href = "index.html"; // Redirect after sign-up
+      window.location.href = "index.html";
     }, 1000);
   } catch (error) {
     if (error.code === "auth/email-already-in-use") {
@@ -78,18 +88,16 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Fetch the user's role from Firestore
     const userDoc = await getDoc(doc(db, "users", user.uid));
 
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      const role = userData.role; // Get the role from the Firestore document
+      const role = userData.role;
 
-      // Redirect based on the role
       if (role === "admin") {
-        window.location.href = "admin-dashboard.html"; // Admin dashboard page
+        window.location.href = "admin-dashboard.html";
       } else {
-        window.location.href = "user-dashboard.html"; // Regular user dashboard page
+        window.location.href = "user-dashboard.html";
       }
     } else {
       showMessage("User not found in the database", "signInMessage");
@@ -103,4 +111,32 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
       showMessage("Error: " + error.message, "signInMessage");
     }
   }
+});
+
+// Google Sign-In
+document.querySelectorAll(".fa-google").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        // Create user in Firestore if not exists
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          firstName: user.displayName?.split(" ")[0] || "",
+          lastName: user.displayName?.split(" ")[1] || "",
+          role: "member"
+        });
+      }
+
+      window.location.href = "user-dashboard.html"; // Redirect after sign-in
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      alert("Google Sign-In failed: " + error.message);
+    }
+  });
 });
