@@ -34,8 +34,26 @@
       height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start; /* changed from center to flex-start to allow header space */
       transition: background-color 0.3s, color 0.3s;
+      padding-top: 70px; /* space for fixed header */
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: var(--card-color);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--link-color);
+      font-size: 1.8rem;
+      font-weight: bold;
+      z-index: 1000;
     }
 
     .container {
@@ -190,10 +208,12 @@
       font-size: 18px;
       cursor: pointer;
       color: var(--link-color);
+      z-index: 1100;
     }
 
     header, footer {
-      display: none;
+      /* remove the previous display none */
+      display: flex;
     }
   </style>
 </head>
@@ -201,6 +221,10 @@
   <button class="toggle-theme" onclick="toggleTheme()">
     <i class="fas fa-moon"></i>
   </button>
+
+  <header>
+    Barangay Commonwealth Portal
+  </header>
 
   <div class="container">
     <!-- Register Form -->
