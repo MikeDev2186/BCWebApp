@@ -42,6 +42,29 @@ function showMessage(message, divId) {
   }
 }
 
+// Helper to collect beneficiary data
+function getBeneficiaries() {
+  const container = document.getElementById("beneficiaries");
+  if (!container) return [];
+
+  const groups = container.querySelectorAll(".form-group");
+  const beneficiaries = [];
+
+  groups.forEach(group => {
+    const name = group.querySelector('[name="beneficiaryName"]')?.value || "";
+    const relationship = group.querySelector('[name="beneficiaryRelationship"]')?.value || "";
+    const age = group.querySelector('[name="beneficiaryAge"]')?.value || "";
+    const pwd = group.querySelector('[name="beneficiaryPWD"]')?.checked || false;
+    const senior = group.querySelector('[name="beneficiarySenior"]')?.checked || false;
+
+    if (name && relationship && age) {
+      beneficiaries.push({ name, relationship, age: parseInt(age), pwd, senior });
+    }
+  });
+
+  return beneficiaries;
+}
+
 // Sign Up
 document.getElementById("submitSignUp").addEventListener("click", async (event) => {
   event.preventDefault();
@@ -55,13 +78,34 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
     const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
     const user = signUpResult.user;
 
-    const role = "member"; 
+    const role = "member";
 
+    // Save to "users" collection
     await setDoc(doc(db, "users", user.uid), {
       email,
       firstName,
       lastName,
       role
+    });
+
+    // Additional Profile Data
+    const phone = document.getElementById("phone")?.value || "";
+    const address = document.getElementById("address")?.value || "";
+    const dob = document.getElementById("dob")?.value || "";
+    const maritalStatus = document.getElementById("maritalStatus")?.value || "";
+    const beneficiaries = getBeneficiaries();
+
+    // Save full profile to "members" collection
+    await setDoc(doc(db, "members", user.uid), {
+      email,
+      firstName,
+      lastName,
+      phone,
+      address,
+      dob,
+      maritalStatus,
+      beneficiaries,
+      createdAt: new Date().toISOString()
     });
 
     showMessage("Account Created Successfully", "signUpMessage");
@@ -131,9 +175,18 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
           lastName: user.displayName?.split(" ")[1] || "",
           role: "member"
         });
+
+        // Also store minimal member profile
+        await setDoc(doc(db, "members", user.uid), {
+          email: user.email,
+          firstName: user.displayName?.split(" ")[0] || "",
+          lastName: user.displayName?.split(" ")[1] || "",
+          createdAt: new Date().toISOString(),
+          beneficiaries: []
+        });
       }
 
-      window.location.href = "user-dashboard.html"; // Redirect after sign-in
+      window.location.href = "user-dashboard.html";
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       alert("Google Sign-In failed: " + error.message);
