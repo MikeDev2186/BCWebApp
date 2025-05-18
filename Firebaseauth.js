@@ -105,7 +105,6 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       dob,
       maritalStatus,
       beneficiaries,
-      renter or onwebkittransitionend,
       createdAt: new Date().toISOString()
     });
 
