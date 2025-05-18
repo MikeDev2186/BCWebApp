@@ -34,9 +34,9 @@
       height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: flex-start; /* changed from center to flex-start to allow header space */
+      align-items: flex-start;
       transition: background-color 0.3s, color 0.3s;
-      padding-top: 70px; /* space for fixed header */
+      padding-top: 70px;
     }
 
     header {
@@ -108,10 +108,9 @@
     .input-group i {
       margin-right: 0.5rem;
       color: #606770;
-      cursor: default;
     }
 
-    .input-group input {
+    .input-group input, .input-group select {
       flex: 1;
       border: none;
       background: none;
@@ -121,7 +120,6 @@
     }
 
     .input-group .toggle-password {
-      margin-right: 0;
       position: absolute;
       right: 10px;
       cursor: pointer;
@@ -146,13 +144,8 @@
       opacity: 0.9;
     }
 
-    .google-btn {
-      background-color: #db4437;
-    }
-
-    .facebook-btn {
-      background-color: #4267B2;
-    }
+    .google-btn { background-color: #db4437; }
+    .facebook-btn { background-color: #4267B2; }
 
     .recover {
       text-align: right;
@@ -166,9 +159,7 @@
       text-decoration: none;
     }
 
-    .recover a:hover {
-      text-decoration: underline;
-    }
+    .recover a:hover { text-decoration: underline; }
 
     .alt-links {
       text-align: center;
@@ -189,10 +180,6 @@
       margin-top: 1rem;
     }
 
-    .google-signin button {
-      margin-top: 0.5rem;
-    }
-
     .messageDiv {
       color: red;
       text-align: center;
@@ -210,11 +197,6 @@
       color: var(--link-color);
       z-index: 1100;
     }
-
-    header, footer {
-      /* remove the previous display none */
-      display: flex;
-    }
   </style>
 </head>
 <body>
@@ -222,9 +204,7 @@
     <i class="fas fa-moon"></i>
   </button>
 
-  <header>
-    Barangay Commonwealth Portal
-  </header>
+  <header>Barangay Commonwealth Portal</header>
 
   <div class="container">
     <!-- Register Form -->
@@ -248,6 +228,14 @@
           <i class="fas fa-lock"></i>
           <input type="password" id="rPassword" placeholder="Password" required />
           <i class="fas fa-eye toggle-password"></i>
+        </div>
+        <div class="input-group">
+          <i class="fas fa-house-user"></i>
+          <select id="renterOwner" required>
+            <option value="" disabled selected>Select Renter/Owner</option>
+            <option value="Renter">Renter</option>
+            <option value="Owner">Owner</option>
+          </select>
         </div>
         <button class="btn" id="submitSignUp">Sign Up</button>
       </form>
@@ -309,7 +297,6 @@
       icon.classList.toggle('fa-sun');
     }
 
-    // Password toggle logic
     document.querySelectorAll('.toggle-password').forEach(icon => {
       icon.addEventListener('click', () => {
         const input = icon.previousElementSibling;
