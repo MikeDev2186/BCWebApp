@@ -2,383 +2,342 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Member Data Center</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Member Registration</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, select { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 400px; }<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Member Registration</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     body {
-      margin: 0;
       font-family: 'Roboto', sans-serif;
-      background: #f2f4f7;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 0;
     }
-
-    .card {
-      background: #fff;
-      padding: 30px;
-      width: 100%;
-      max-width: 600px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      border-radius: 10px;
-    }
-
-    h2, h3 {
+    header {
+      background-color: #00796b;
+      color: white;
+      padding: 20px;
       text-align: center;
-      color: #004494;
-      margin-bottom: 20px;
     }
-
-    input, select {
+    .dashboard-container {
+      max-width: 800px;
+      margin: 30px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: #00796b;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 500;
+      color: #333;
+    }
+    input, select, textarea {
       width: 100%;
-      padding: 10px;
-      margin-top: 10px;
+      padding: 12px;
+      margin-top: 8px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 16px;
+      background-color: #f9f9f9;
+      box-sizing: border-box;
     }
-
+    textarea {
+      resize: vertical;
+    }
+    button {
+      margin-top: 20px;
+      padding: 14px;
+      width: 100%;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    .logout {
+      background-color: #e53935;
+    }
+    .logout:hover {
+      background-color: #d32f2f;
+    }
     .form-group {
-      border: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .beneficiaries-container {
+      margin-top: 10px;
+      border: 1px solid #ccc;
       padding: 15px;
       border-radius: 6px;
-      background: #f9f9f9;
-      margin-bottom: 10px;
+      background-color: #f1f8f7;
     }
-
-    button {
-      background-color: #004494;
-      color: #fff;
+    .beneficiary {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    .beneficiary label {
+      flex: 0 0 110px;
+      font-weight: 500;
+      color: #00796b;
+    }
+    .beneficiary input {
+      flex: 1;
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+    }
+    .beneficiary button {
+      flex: 0 0 auto;
+      width: auto;
+      background-color: #e53935;
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 4px;
       border: none;
-      padding: 12px 20px;
-      font-size: 16px;
+      cursor: pointer;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    .beneficiary button:hover {
+      background-color: #d32f2f;
+    }
+    #addBeneficiaryBtn {
+      margin-top: 10px;
+      background-color: #00796b;
+      padding: 10px 14px;
+      font-size: 15px;
       border-radius: 6px;
       cursor: pointer;
-      margin-top: 15px;
+      border: none;
+      color: white;
+      transition: background-color 0.3s ease;
     }
-
-    button:hover {
-      background-color: #002d6b;
-    }
-
-    #signUpMessage {
-      margin-top: 15px;
-      padding: 10px;
-      background-color: #e0ffe0;
-      border: 1px solid #00cc00;
-      color: #006600;
-      border-radius: 6px;
-      text-align: center;
+    #addBeneficiaryBtn:hover {
+      background-color: #004d40;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <form id="registrationForm">
-      <h2>Member Registration</h2>
 
-      <input type="text" id="fName" placeholder="First Name" required />
-      <input type="text" id="lName" placeholder="Last Name" required />
-      <input type="email" id="rEmail" placeholder="Email" required />
-      <input type="password" id="rPassword" placeholder="Password" required />
+<header>
+  <h1>Member Dashboard</h1>
+</header>
 
-      <input type="tel" id="phone" placeholder="Phone Number" />
-      <input type="text" id="address" placeholder="Address" />
-      <input type="date" id="dob" placeholder="Date of Birth" />
-
-      <select id="maritalStatus">
-        <option value="">Select Marital Status</option>
-        <option value="Single">Single</option>
-        <option value="Married">Married</option>
-        <option value="Widowed">Widowed</option>
-        <option value="Divorced">Divorced</option>
-      </select>
-
-      <h3>Beneficiaries</h3>
-      <div id="beneficiaries">
-        <div class="form-group">
-          <input type="text" name="beneficiaryName" placeholder="Full Name" />
-          <input type="text" name="beneficiaryRelationship" placeholder="Relationship" />
-          <input type="number" name="beneficiaryAge" placeholder="Age" />
-          <label><input type="checkbox" name="beneficiaryPWD" /> PWD</label>
-          <label><input type="checkbox" name="beneficiarySenior" /> Senior</label>
-        </div>
-      </div>
-
-      <button type="button" onclick="addBeneficiary()">+ Add Beneficiary</button>
-      <button type="submit" id="submitSignUp">Register</button>
-
-      <div id="signUpMessage" style="display:none;"></div>
-    </form>
-  </div>
-
-  <!-- Firebase Scripts -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc
-    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
-      authDomain: "npwebapp-c9ee3.firebaseapp.com",
-      projectId: "npwebapp-c9ee3",
-      storageBucket: "npwebapp-c9ee3.appspot.com",
-      messagingSenderId: "149339991351",
-      appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
-      measurementId: "G-X761ZGHTSH"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    function showMessage(message) {
-      const div = document.getElementById("signUpMessage");
-      div.innerText = message;
-      div.style.display = "block";
-      div.style.opacity = 1;
-      setTimeout(() => (div.style.opacity = 0), 4000);
-    }
-
-    function getBeneficiaries() {
-      const beneficiaries = [];
-      const groups = document.querySelectorAll("#beneficiaries .form-group");
-      groups.forEach(group => {
-        const name = group.querySelector("[name='beneficiaryName']").value;
-        const relationship = group.querySelector("[name='beneficiaryRelationship']").value;
-        const age = parseInt(group.querySelector("[name='beneficiaryAge']").value) || null;
-        const pwd = group.querySelector("[name='beneficiaryPWD']").checked;
-        const senior = group.querySelector("[name='beneficiarySenior']").checked;
-
-        if (name || relationship || age) {
-          beneficiaries.push({ name, relationship, age, pwd, senior });
-        }
-      });
-      return beneficiaries;
-    }
-
-    document.getElementById("registrationForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const email = document.getElementById("rEmail").value.trim();
-      const password = document.getElementById("rPassword").value;
-      const firstName = document.getElementById("fName").value.trim();
-      const lastName = document.getElementById("lName").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const dob = document.getElementById("dob").value;
-      const maritalStatus = document.getElementById("maritalStatus").value;
-
-      const beneficiaries = getBeneficiaries();
-
-      try {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        const user = result.user;
-
-        await setDoc(doc(db, "users", user.uid), {
-          email,
-          firstName,
-          lastName,
-          phone,
-          address,
-          dob,
-          maritalStatus,
-          beneficiaries,
-          role: "member"
-        });
-
-        showMessage("Account created successfully!");
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1500);
-      } catch (error) {
-        showMessage("Error: " + error.message);
-      }
-    });
-
-    window.addBeneficiary = function () {
-      const container = document.getElementById("beneficiaries");
-      const group = document.createElement("div");
-      group.classList.add("form-group");
-      group.innerHTML = `
-        <input type="text" name="beneficiaryName" placeholder="Full Name" />
-        <input type="text" name="beneficiaryRelationship" placeholder="Relationship" />
-        <input type="number" name="beneficiaryAge" placeholder="Age" />
-        <label><input type="checkbox" name="beneficiaryPWD" /> PWD</label>
-        <label><input type="checkbox" name="beneficiarySenior" /> Senior</label>
-      `;
-      container.appendChild(group);
-    };
-  </script>
-</body>
-</html>
-
-    .form-group { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    button { padding: 10px 20px; }
-  </style>
-</head>
-<body>
-
-  <form id="registrationForm">
-    <h2>Member Registration</h2>
-
-    <input type="text" id="fName" placeholder="First Name" required />
-    <input type="text" id="lName" placeholder="Last Name" required />
-    <input type="email" id="rEmail" placeholder="Email" required />
-    <input type="password" id="rPassword" placeholder="Password" required />
-
-    <input type="tel" id="phone" placeholder="Phone Number" />
-    <input type="text" id="address" placeholder="Address" />
-    <input type="date" id="dob" placeholder="Date of Birth" />
-
-    <select id="maritalStatus">
-      <option value="">Select Marital Status</option>
-      <option value="Single">Single</option>
-      <option value="Married">Married</option>
-      <option value="Widowed">Widowed</option>
-      <option value="Divorced">Divorced</option>
-    </select>
-
-    <h3>Beneficiaries</h3>
-    <div id="beneficiaries">
-      <div class="form-group">
-        <input type="text" name="beneficiaryName" placeholder="Full Name" />
-        <input type="text" name="beneficiaryRelationship" placeholder="Relationship" />
-        <input type="number" name="beneficiaryAge" placeholder="Age" />
-        <label><input type="checkbox" name="beneficiaryPWD" /> PWD</label>
-        <label><input type="checkbox" name="beneficiarySenior" /> Senior</label>
-      </div>
+<div class="dashboard-container">
+  <h2>Member Information</h2>
+  <form id="memberForm">
+    <div class="form-group">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" placeholder="Enter full name" required />
     </div>
 
-    <button type="button" onclick="addBeneficiary()">Add Another Beneficiary</button>
-    <br>
-    <button type="submit" id="submitSignUp">Register</button>
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="Enter email address" required disabled />
+    </div>
 
-    <div id="signUpMessage" style="display:none; color: green; margin-top: 10px;"></div>
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="Enter phone number" pattern="[0-9+\-\s]+" required />
+    </div>
+
+    <div class="form-group">
+      <label for="address">Address</label>
+      <textarea id="address" placeholder="Enter address" rows="3" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" required />
+    </div>
+
+    <div class="form-group">
+      <label for="maritalStatus">Marital Status</label>
+      <select id="maritalStatus" required>
+        <option value="">-- Select Marital Status --</option>
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+        <option value="divorced">Divorced</option>
+        <option value="widowed">Widowed</option>
+      </select>
+    </div>
+
+    <h3>Beneficiaries</h3>
+    <div class="beneficiaries-container" id="beneficiariesContainer">
+      <!-- Beneficiary fields appended here -->
+    </div>
+    <button type="button" id="addBeneficiaryBtn">Add Beneficiary</button>
+
+    <button type="submit">Save Information</button>
+    <button type="button" class="logout" onclick="logout()">Logout</button>
   </form>
+</div>
 
-  <!-- Firebase Scripts -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc
-    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+  import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
-      authDomain: "npwebapp-c9ee3.firebaseapp.com",
-      projectId: "npwebapp-c9ee3",
-      storageBucket: "npwebapp-c9ee3.appspot.com",
-      messagingSenderId: "149339991351",
-      appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
-      measurementId: "G-X761ZGHTSH"
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
+    authDomain: "npwebapp-c9ee3.firebaseapp.com",
+    projectId: "npwebapp-c9ee3",
+    storageBucket: "npwebapp-c9ee3.appspot.com",
+    messagingSenderId: "149339991351",
+    appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
+    measurementId: "G-X761ZGHTSH"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const emailInput = document.getElementById("email");
+  const beneficiariesContainer = document.getElementById("beneficiariesContainer");
+  const addBeneficiaryBtn = document.getElementById("addBeneficiaryBtn");
+
+  function addBeneficiary(name = "") {
+    const div = document.createElement("div");
+    div.classList.add("beneficiary");
+
+    const label = document.createElement("label");
+    label.textContent = "Beneficiary Name:";
+    label.setAttribute("aria-label", "Beneficiary Name");
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Beneficiary name";
+    input.value = name;
+    input.required = true;
+    input.setAttribute("aria-required", "true");
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "Remove";
+    removeBtn.onclick = () => {
+      if (confirm("Are you sure you want to remove this beneficiary?")) {
+        div.remove();
+      }
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    div.appendChild(label);
+    div.appendChild(input);
+    div.appendChild(removeBtn);
 
-    function showMessage(message) {
-      const div = document.getElementById("signUpMessage");
-      div.innerText = message;
-      div.style.display = "block";
-      div.style.opacity = 1;
-      setTimeout(() => (div.style.opacity = 0), 4000);
+    beneficiariesContainer.appendChild(div);
+  }
+
+  addBeneficiaryBtn.addEventListener("click", () => {
+    // Prevent adding empty beneficiary fields if last is empty
+    const lastInput = beneficiariesContainer.querySelector("input:last-of-type");
+    if (lastInput && lastInput.value.trim() === "") {
+      alert("Please fill in the existing beneficiary before adding a new one.");
+      lastInput.focus();
+      return;
     }
+    addBeneficiary();
+  });
 
-    function getBeneficiaries() {
-      const beneficiaries = [];
-      const groups = document.querySelectorAll("#beneficiaries .form-group");
-      groups.forEach(group => {
-        const name = group.querySelector("[name='beneficiaryName']").value;
-        const relationship = group.querySelector("[name='beneficiaryRelationship']").value;
-        const age = parseInt(group.querySelector("[name='beneficiaryAge']").value) || null;
-        const pwd = group.querySelector("[name='beneficiaryPWD']").checked;
-        const senior = group.querySelector("[name='beneficiarySenior']").checked;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      emailInput.value = user.email || localStorage.getItem("userEmail") || "";
+      loadMemberData(user.uid);
+    } else {
+      alert("You are not logged in. Redirecting to login page.");
+      window.location.href = "index.html";
+    }
+  });
 
-        if (name || relationship || age) {
-          beneficiaries.push({ name, relationship, age, pwd, senior });
+  async function loadMemberData(uid) {
+    try {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById("fullName").value = data.fullName || "";
+        document.getElementById("phone").value = data.phone || "";
+        document.getElementById("address").value = data.address || "";
+        document.getElementById("dob").value = data.dob || "";
+        document.getElementById("maritalStatus").value = data.maritalStatus || "";
+
+        beneficiariesContainer.innerHTML = "";
+        if (Array.isArray(data.beneficiaries) && data.beneficiaries.length > 0) {
+          data.beneficiaries.forEach(name => addBeneficiary(name));
+        } else {
+          addBeneficiary();
         }
-      });
-      return beneficiaries;
-    }
-
-    document.getElementById("registrationForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const email = document.getElementById("rEmail").value.trim();
-      const password = document.getElementById("rPassword").value;
-      const firstName = document.getElementById("fName").value.trim();
-      const lastName = document.getElementById("lName").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const dob = document.getElementById("dob").value;
-      const maritalStatus = document.getElementById("maritalStatus").value;
-
-      const beneficiaries = getBeneficiaries();
-
-      try {
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        const user = result.user;
-
-        await setDoc(doc(db, "users", user.uid), {
-          email,
-          firstName,
-          lastName,
-          phone,
-          address,
-          dob,
-          maritalStatus,
-          beneficiaries,
-          role: "member"
-        });
-
-        showMessage("Account created successfully!");
-
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1500);
-      } catch (error) {
-        showMessage("Error: " + error.message);
+      } else {
+        addBeneficiary();
       }
+    } catch (error) {
+      console.error("Error loading member data:", error);
+      addBeneficiary();
+    }
+  }
+
+  document.getElementById("memberForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const beneficiaries = [];
+    beneficiariesContainer.querySelectorAll("input").forEach(input => {
+      if (input.value.trim()) beneficiaries.push(input.value.trim());
     });
 
-    window.addBeneficiary = function () {
-      const container = document.getElementById("beneficiaries");
-      const group = document.createElement("div");
-      group.classList.add("form-group");
-      group.innerHTML = `
-        <input type="text" name="beneficiaryName" placeholder="Full Name" />
-        <input type="text" name="beneficiaryRelationship" placeholder="Relationship" />
-        <input type="number" name="beneficiaryAge" placeholder="Age" />
-        <label><input type="checkbox" name="beneficiaryPWD" /> PWD</label>
-        <label><input type="checkbox" name="beneficiarySenior" /> Senior</label>
-      `;
-      container.appendChild(group);
+    if (beneficiaries.length === 0) {
+      alert("Please add at least one beneficiary.");
+      return;
     }
-  </script>
+
+    const user = auth.currentUser;
+    if (!user) {
+      alert("User not authenticated. Please login again.");
+      return;
+    }
+
+    const data = {
+      fullName: document.getElementById("fullName").value.trim(),
+      email: emailInput.value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      dob: document.getElementById("dob").value,
+      maritalStatus: document.getElementById("maritalStatus").value,
+      beneficiaries,
+      lastUpdated: new Date().toISOString()
+    };
+
+    try {
+      await setDoc(doc(db, "users", user.uid), data);
+      alert("Information saved successfully!");
+    } catch (error) {
+      console.error("Error saving member info: ", error);
+      alert("Failed to save information.");
+    }
+  });
+
+  window.logout = async function() {
+    try {
+      await signOut(auth);
+      alert("Logged out successfully.");
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Logout error: ", error);
+      alert("Error logging out.");
+    }
+  };
+</script>
+
 </body>
 </html>
