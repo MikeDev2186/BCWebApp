@@ -197,6 +197,13 @@
       color: var(--link-color);
       z-index: 1100;
     }
+
+    /* Added style for user category display */
+    #userCategory {
+      margin-bottom: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -212,6 +219,7 @@
       <h2 class="form-title">Register</h2>
       <form id="registerForm">
         <div id="signUpMessage" class="messageDiv" style="display: none;"></div>
+
         <div class="input-group">
           <i class="fas fa-user"></i>
           <input type="text" id="fName" placeholder="First Name" required />
@@ -229,6 +237,22 @@
           <input type="password" id="rPassword" placeholder="Password" required />
           <i class="fas fa-eye toggle-password"></i>
         </div>
+
+        <!-- ADDED Date of Birth input -->
+        <div class="input-group">
+          <i class="fas fa-calendar"></i>
+          <input type="date" id="dob" placeholder="Date of Birth" required />
+        </div>
+
+        <!-- User Category display -->
+        <div id="userCategory"></div>
+
+        <!-- ADDED Senior checkbox -->
+        <div class="input-group" style="padding-left: 2rem;">
+          <input type="checkbox" id="seniorCheckbox" name="senior" disabled />
+          <label for="seniorCheckbox" style="margin-left: 0.5rem; user-select: none;">Senior Citizen</label>
+        </div>
+
         <div class="input-group">
           <i class="fas fa-house-user"></i>
           <select id="renterOwner" required>
@@ -310,6 +334,64 @@
           icon.classList.add('fa-eye');
         }
       });
+    });
+
+    // --- Added age category logic ---
+    function getUserCategoryFromDOB(dob) {
+      const birthDate = new Date(dob);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      const isStudent = age >= 5 && age <= 21;
+      const isSenior = age >= 60;
+
+      return { age, isStudent, isSenior };
+    }
+
+    document.getElementById("dob").addEventListener("change", () => {
+      const dob = document.getElementById("dob").value;
+      const categoryDiv = document.getElementById("userCategory");
+      const seniorCheckbox = document.getElementById("seniorCheckbox");
+
+      if (!dob) {
+        categoryDiv.textContent = "";
+        if (seniorCheckbox) {
+          seniorCheckbox.checked = false;
+          seniorCheckbox.disabled = true;
+        }
+        return;
+      }
+
+      const { age, isStudent, isSenior } = getUserCategoryFromDOB(dob);
+
+      if (isSenior) {
+        categoryDiv.textContent = `Senior Citizen (${age} years old)`;
+        categoryDiv.style.color = "#b91c1c"; // red color
+        if (seniorCheckbox) {
+          seniorCheckbox.checked = true;
+          seniorCheckbox.disabled = false;
+        }
+      } else if (isStudent) {
+        categoryDiv.textContent = `Student (${age} years old)`;
+        categoryDiv.style.color = "#1d4ed8"; // blue color
+        if (seniorCheckbox) {
+          seniorCheckbox.checked = false;
+          seniorCheckbox.disabled = true;
+        }
+      } else {
+        categoryDiv.textContent = `Adult (${age} years old)`;
+        categoryDiv.style.color = "#047857"; // green color
+        if (seniorCheckbox) {
+          seniorCheckbox.checked = false;
+          seniorCheckbox.disabled = false;
+        }
+      }
     });
   </script>
 </body>
