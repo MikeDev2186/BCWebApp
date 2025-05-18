@@ -34,9 +34,9 @@
       height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: flex-start; /* changed from center to flex-start to allow header space */
       transition: background-color 0.3s, color 0.3s;
-      padding-top: 70px;
+      padding-top: 70px; /* space for fixed header */
     }
 
     header {
@@ -108,9 +108,10 @@
     .input-group i {
       margin-right: 0.5rem;
       color: #606770;
+      cursor: default;
     }
 
-    .input-group input, .input-group select {
+    .input-group input {
       flex: 1;
       border: none;
       background: none;
@@ -120,6 +121,7 @@
     }
 
     .input-group .toggle-password {
+      margin-right: 0;
       position: absolute;
       right: 10px;
       cursor: pointer;
@@ -144,8 +146,13 @@
       opacity: 0.9;
     }
 
-    .google-btn { background-color: #db4437; }
-    .facebook-btn { background-color: #4267B2; }
+    .google-btn {
+      background-color: #db4437;
+    }
+
+    .facebook-btn {
+      background-color: #4267B2;
+    }
 
     .recover {
       text-align: right;
@@ -159,7 +166,9 @@
       text-decoration: none;
     }
 
-    .recover a:hover { text-decoration: underline; }
+    .recover a:hover {
+      text-decoration: underline;
+    }
 
     .alt-links {
       text-align: center;
@@ -180,6 +189,10 @@
       margin-top: 1rem;
     }
 
+    .google-signin button {
+      margin-top: 0.5rem;
+    }
+
     .messageDiv {
       color: red;
       text-align: center;
@@ -198,11 +211,9 @@
       z-index: 1100;
     }
 
-    /* Added style for user category display */
-    #userCategory {
-      margin-bottom: 1rem;
-      font-weight: bold;
-      text-align: center;
+    header, footer {
+      /* remove the previous display none */
+      display: flex;
     }
   </style>
 </head>
@@ -211,7 +222,9 @@
     <i class="fas fa-moon"></i>
   </button>
 
-  <header>Barangay Commonwealth Portal</header>
+  <header>
+    Barangay Commonwealth Portal
+  </header>
 
   <div class="container">
     <!-- Register Form -->
@@ -219,7 +232,6 @@
       <h2 class="form-title">Register</h2>
       <form id="registerForm">
         <div id="signUpMessage" class="messageDiv" style="display: none;"></div>
-
         <div class="input-group">
           <i class="fas fa-user"></i>
           <input type="text" id="fName" placeholder="First Name" required />
@@ -236,30 +248,6 @@
           <i class="fas fa-lock"></i>
           <input type="password" id="rPassword" placeholder="Password" required />
           <i class="fas fa-eye toggle-password"></i>
-        </div>
-
-        <!-- ADDED Date of Birth input -->
-        <div class="input-group">
-          <i class="fas fa-calendar"></i>
-          <input type="date" id="dob" placeholder="Date of Birth" required />
-        </div>
-
-        <!-- User Category display -->
-        <div id="userCategory"></div>
-
-        <!-- ADDED Senior checkbox -->
-        <div class="input-group" style="padding-left: 2rem;">
-          <input type="checkbox" id="seniorCheckbox" name="senior" disabled />
-          <label for="seniorCheckbox" style="margin-left: 0.5rem; user-select: none;">Senior Citizen</label>
-        </div>
-
-        <div class="input-group">
-          <i class="fas fa-house-user"></i>
-          <select id="renterOwner" required>
-            <option value="" disabled selected>Select Renter/Owner</option>
-            <option value="Renter">Renter</option>
-            <option value="Owner">Owner</option>
-          </select>
         </div>
         <button class="btn" id="submitSignUp">Sign Up</button>
       </form>
@@ -321,6 +309,7 @@
       icon.classList.toggle('fa-sun');
     }
 
+    // Password toggle logic
     document.querySelectorAll('.toggle-password').forEach(icon => {
       icon.addEventListener('click', () => {
         const input = icon.previousElementSibling;
@@ -334,64 +323,6 @@
           icon.classList.add('fa-eye');
         }
       });
-    });
-
-    // --- Added age category logic ---
-    function getUserCategoryFromDOB(dob) {
-      const birthDate = new Date(dob);
-      const today = new Date();
-
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-
-      const isStudent = age >= 5 && age <= 21;
-      const isSenior = age >= 60;
-
-      return { age, isStudent, isSenior };
-    }
-
-    document.getElementById("dob").addEventListener("change", () => {
-      const dob = document.getElementById("dob").value;
-      const categoryDiv = document.getElementById("userCategory");
-      const seniorCheckbox = document.getElementById("seniorCheckbox");
-
-      if (!dob) {
-        categoryDiv.textContent = "";
-        if (seniorCheckbox) {
-          seniorCheckbox.checked = false;
-          seniorCheckbox.disabled = true;
-        }
-        return;
-      }
-
-      const { age, isStudent, isSenior } = getUserCategoryFromDOB(dob);
-
-      if (isSenior) {
-        categoryDiv.textContent = `Senior Citizen (${age} years old)`;
-        categoryDiv.style.color = "#b91c1c"; // red color
-        if (seniorCheckbox) {
-          seniorCheckbox.checked = true;
-          seniorCheckbox.disabled = false;
-        }
-      } else if (isStudent) {
-        categoryDiv.textContent = `Student (${age} years old)`;
-        categoryDiv.style.color = "#1d4ed8"; // blue color
-        if (seniorCheckbox) {
-          seniorCheckbox.checked = false;
-          seniorCheckbox.disabled = true;
-        }
-      } else {
-        categoryDiv.textContent = `Adult (${age} years old)`;
-        categoryDiv.style.color = "#047857"; // green color
-        if (seniorCheckbox) {
-          seniorCheckbox.checked = false;
-          seniorCheckbox.disabled = false;
-        }
-      }
     });
   </script>
 </body>
