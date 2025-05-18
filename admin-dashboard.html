@@ -46,6 +46,7 @@
       border: 1px solid #ccc;
       padding: 10px;
       text-align: left;
+      vertical-align: middle;
     }
     th {
       background-color: #00796b;
@@ -67,6 +68,91 @@
     button.export:hover {
       background-color: #004d40;
     }
+    button.update-btn {
+      background-color: #00796b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    button.update-btn:hover {
+      background-color: #004d40;
+    }
+    button.edit-beneficiaries-btn {
+      background-color: #0288d1;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button.edit-beneficiaries-btn:hover {
+      background-color: #01579b;
+    }
+    /* Modal Styles */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto; 
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #00796b;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      font-size: 16px;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    .modal-buttons {
+      margin-top: 15px;
+      text-align: right;
+    }
+    .modal-buttons button {
+      background-color: #00796b;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      font-size: 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .modal-buttons button:hover {
+      background-color: #004d40;
+    }
+    .modal-buttons .cancel-btn {
+      background-color: #ccc;
+      color: #333;
+    }
+    .modal-buttons .cancel-btn:hover {
+      background-color: #999;
+    }
   </style>
 </head>
 <body>
@@ -77,7 +163,7 @@
 
 <div class="dashboard-container">
   <h2>Registered Members</h2>
-  <input type="text" id="searchInput" placeholder="Search members by name or email...">
+  <input type="text" id="searchInput" placeholder="Search members by name or email..." autocomplete="off" />
   <table id="membersTable">
     <thead>
       <tr>
@@ -88,6 +174,7 @@
         <th>Date of Birth</th>
         <th>Marital Status</th>
         <th>Beneficiaries</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -95,126 +182,5 @@
   <button class="export" onclick="exportToCSV()">Export to CSV</button>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-  import { getFirestore, getDocs, collection, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
-    authDomain: "npwebapp-c9ee3.firebaseapp.com",
-    projectId: "npwebapp-c9ee3",
-    storageBucket: "npwebapp-c9ee3.appspot.com",
-    messagingSenderId: "149339991351",
-    appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
-    measurementId: "G-X761ZGHTSH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  const membersTableBody = document.querySelector("#membersTable tbody");
-  const searchInput = document.getElementById("searchInput");
-  let allMembers = [];
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      await loadAllMembers();
-    } else {
-      alert("Not logged in.");
-      window.location.href = "index.html";
-    }
-  });
-
-  async function loadAllMembers() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      allMembers = [];
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        allMembers.push({ ...data, id: docSnap.id });
-      });
-      renderTable(allMembers);
-    } catch (error) {
-      console.error("Error loading members:", error);
-      alert("Failed to load member list.");
-    }
-  }
-
-  function renderTable(members) {
-    membersTableBody.innerHTML = "";
-    members.forEach((data) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td contenteditable="true">${data.fullName || ""}</td>
-        <td>${data.email || ""}</td>
-        <td contenteditable="true">${data.phone || ""}</td>
-        <td contenteditable="true">${data.address || ""}</td>
-        <td contenteditable="true">${data.dob || ""}</td>
-        <td contenteditable="true">${data.maritalStatus || ""}</td>
-        <td><ul>${(data.beneficiaries || []).map(b => `<li>${b}</li>`).join("")}</ul></td>
-        <td><button onclick="updateMember(this, '${data.id}')">Update</button></td>
-      `;
-      membersTableBody.appendChild(row);
-    });
-  }
-
-  window.updateMember = async function (btn, docId) {
-    const row = btn.closest("tr");
-    const fullName = row.children[0].innerText.trim();
-    const phone = row.children[2].innerText.trim();
-    const address = row.children[3].innerText.trim();
-    const dob = row.children[4].innerText.trim();
-    const maritalStatus = row.children[5].innerText.trim();
-
-    try {
-      const docRef = doc(db, "users", docId);
-      await updateDoc(docRef, {
-        fullName,
-        phone,
-        address,
-        dob,
-        maritalStatus
-      });
-      alert("Member info updated successfully.");
-    } catch (error) {
-      console.error("Error updating document:", error);
-      alert("Failed to update member info.");
-    }
-  };
-
-  searchInput.addEventListener("input", () => {
-    const keyword = searchInput.value.toLowerCase();
-    const filtered = allMembers.filter(m =>
-      (m.fullName || "").toLowerCase().includes(keyword) ||
-      (m.email || "").toLowerCase().includes(keyword)
-    );
-    renderTable(filtered);
-  });
-
-  window.exportToCSV = function () {
-    const headers = ["Full Name", "Email", "Phone", "Address", "Date of Birth", "Marital Status", "Beneficiaries"];
-    const rows = allMembers.map(m => [
-      m.fullName || "",
-      m.email || "",
-      m.phone || "",
-      m.address || "",
-      m.dob || "",
-      m.maritalStatus || "",
-      (m.beneficiaries || []).join(" | ")
-    ]);
-    let csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "member_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-</script>
-
-
-</body>
-</html>
+<!-- Beneficiaries Edit Modal -->
+<div id="beneficia
