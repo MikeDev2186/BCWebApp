@@ -59,7 +59,6 @@
       border-radius: 6px;
       font-size: 16px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
     button:hover {
       background-color: #004d40;
@@ -84,20 +83,9 @@
       display: flex;
       gap: 10px;
       margin-bottom: 10px;
-      align-items: center;
-    }
-    .beneficiary label {
-      flex: 0 0 110px;
-      font-weight: 500;
-      color: #00796b;
     }
     .beneficiary input {
       flex: 1;
-      padding: 10px;
-      font-size: 15px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      background-color: #fff;
     }
     .beneficiary button {
       flex: 0 0 auto;
@@ -109,7 +97,6 @@
       border: none;
       cursor: pointer;
       color: white;
-      transition: background-color 0.3s ease;
     }
     .beneficiary button:hover {
       background-color: #d32f2f;
@@ -123,7 +110,6 @@
       cursor: pointer;
       border: none;
       color: white;
-      transition: background-color 0.3s ease;
     }
     #addBeneficiaryBtn:hover {
       background-color: #004d40;
@@ -177,7 +163,7 @@
 
     <h3>Beneficiaries</h3>
     <div class="beneficiaries-container" id="beneficiariesContainer">
-      <!-- Beneficiary fields appended here -->
+      <!-- Beneficiary fields will be appended here -->
     </div>
     <button type="button" id="addBeneficiaryBtn">Add Beneficiary</button>
 
@@ -209,53 +195,37 @@
   const beneficiariesContainer = document.getElementById("beneficiariesContainer");
   const addBeneficiaryBtn = document.getElementById("addBeneficiaryBtn");
 
+  // Utility: Add new beneficiary input field
   function addBeneficiary(name = "") {
     const div = document.createElement("div");
     div.classList.add("beneficiary");
-
-    const label = document.createElement("label");
-    label.textContent = "Beneficiary Name:";
-    label.setAttribute("aria-label", "Beneficiary Name");
 
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Beneficiary name";
     input.value = name;
     input.required = true;
-    input.setAttribute("aria-required", "true");
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
     removeBtn.textContent = "Remove";
-    removeBtn.onclick = () => {
-      if (confirm("Are you sure you want to remove this beneficiary?")) {
-        div.remove();
-      }
-    };
+    removeBtn.onclick = () => div.remove();
 
-    div.appendChild(label);
     div.appendChild(input);
     div.appendChild(removeBtn);
 
     beneficiariesContainer.appendChild(div);
   }
 
-  addBeneficiaryBtn.addEventListener("click", () => {
-    // Prevent adding empty beneficiary fields if last is empty
-    const lastInput = beneficiariesContainer.querySelector("input:last-of-type");
-    if (lastInput && lastInput.value.trim() === "") {
-      alert("Please fill in the existing beneficiary before adding a new one.");
-      lastInput.focus();
-      return;
-    }
-    addBeneficiary();
-  });
+  addBeneficiaryBtn.addEventListener("click", () => addBeneficiary());
 
+  // Fill email from auth state or localStorage
   onAuthStateChanged(auth, (user) => {
     if (user) {
       emailInput.value = user.email || localStorage.getItem("userEmail") || "";
       loadMemberData(user.uid);
     } else {
+      // Not logged in, redirect or show error
       alert("You are not logged in. Redirecting to login page.");
       window.location.href = "index.html";
     }
@@ -273,14 +243,15 @@
         document.getElementById("dob").value = data.dob || "";
         document.getElementById("maritalStatus").value = data.maritalStatus || "";
 
+        // Clear existing beneficiaries
         beneficiariesContainer.innerHTML = "";
         if (Array.isArray(data.beneficiaries) && data.beneficiaries.length > 0) {
           data.beneficiaries.forEach(name => addBeneficiary(name));
         } else {
-          addBeneficiary();
+          addBeneficiary(); // Add one empty by default
         }
       } else {
-        addBeneficiary();
+        addBeneficiary(); // no data, add one empty beneficiary input
       }
     } catch (error) {
       console.error("Error loading member data:", error);
@@ -291,15 +262,11 @@
   document.getElementById("memberForm").addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    // Gather beneficiaries values
     const beneficiaries = [];
     beneficiariesContainer.querySelectorAll("input").forEach(input => {
       if (input.value.trim()) beneficiaries.push(input.value.trim());
     });
-
-    if (beneficiaries.length === 0) {
-      alert("Please add at least one beneficiary.");
-      return;
-    }
 
     const user = auth.currentUser;
     if (!user) {
