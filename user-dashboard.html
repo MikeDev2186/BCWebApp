@@ -13,7 +13,7 @@
   <h1>Member Dashboard</h1>
 </header>
 
-<div style="display: flex; flex: 1;">
+<div class="main-content">
   <div class="dashboard-container">
     <h2>Member Information</h2>
     <form id="memberForm">
@@ -198,9 +198,9 @@
     }
   };
 
-  function showSection(section) {
+  window.showSection = function(section) {
     alert(`You clicked "${section}" — implement the section functionality here.`);
-  }
+  };
 </script>
 
 </body>
