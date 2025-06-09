@@ -36,6 +36,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Debug function to log database operations
+function debugLog(operation, data) {
+  console.log(`[DEBUG] ${operation}:`, data);
+}
+
 // Show messages
 function showMessage(message, divId) {
   const messageDiv = document.getElementById(divId);
@@ -75,15 +80,16 @@ function getBeneficiaries() {
 // Upload file to Firebase Storage
 async function uploadDocument(userId, file) {
   try {
+    debugLog("Starting file upload", { userId, fileName: file.name });
     const fileRef = ref(storage, `documents/${userId}/${file.name}`);
-    await uploadBytes(fileRef, file);
+    const snapshot = await uploadBytes(fileRef, file);
+    debugLog("File uploaded successfully", snapshot);
     const downloadURL = await getDownloadURL(fileRef);
-    console.log("✅ File uploaded:", downloadURL);
+    debugLog("Download URL obtained", downloadURL);
     return downloadURL;
-  } catch (err) {
-    console.error("❌ Upload failed:", err);
-    showMessage("File upload failed. Try again.", "signUpMessage");
-    throw err;
+  } catch (error) {
+    debugLog("File upload error", error);
+    throw error;
   }
 }
 
@@ -98,6 +104,8 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
   const barangay = document.getElementById("barangay").value;
   const file = document.getElementById("validDocument").files[0];
 
+  debugLog("Sign up attempt", { email, firstName, lastName, barangay, hasFile: !!file });
+
   if (barangay !== "Commonwealth") {
     showMessage("Registration restricted to Barangay Commonwealth only", "signUpMessage");
     return;
@@ -109,31 +117,42 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
   }
 
   try {
-    console.log("📧 Creating user account...");
+    // Step 1: Create user account
+    debugLog("Creating user account", { email });
     const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
     const user = signUpResult.user;
-    console.log("✅ User created:", user.uid);
+    debugLog("User account created", { uid: user.uid, email: user.email });
 
-    const role = "member";
-
-    console.log("📤 Uploading document...");
+    // Step 2: Upload document
     const documentURL = await uploadDocument(user.uid, file);
 
-    console.log("📝 Saving user data to Firestore...");
-    await setDoc(doc(db, "users", user.uid), {
+    // Step 3: Prepare user data
+    const role = "member";
+    const userData = {
       email,
       firstName,
       lastName,
       role
-    });
+    };
+    debugLog("Preparing to save user data", userData);
 
+    // Step 4: Save to "users" collection
+    try {
+      await setDoc(doc(db, "users", user.uid), userData);
+      debugLog("Successfully saved to users collection", { uid: user.uid });
+    } catch (dbError) {
+      debugLog("Error saving to users collection", dbError);
+      throw new Error(`Failed to save user data: ${dbError.message}`);
+    }
+
+    // Step 5: Prepare member data
     const phone = document.getElementById("phone")?.value || "";
     const address = document.getElementById("address")?.value || "";
     const dob = document.getElementById("dob")?.value || "";
     const maritalStatus = document.getElementById("maritalStatus")?.value || "";
     const beneficiaries = getBeneficiaries();
 
-    await setDoc(doc(db, "members", user.uid), {
+    const memberData = {
       email,
       firstName,
       lastName,
@@ -145,17 +164,36 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       documentURL,
       beneficiaries,
       createdAt: new Date().toISOString()
-    });
+    };
+    debugLog("Preparing to save member data", memberData);
 
-    console.log("✅ Firestore save complete.");
+    // Step 6: Save to "members" collection
+    try {
+      await setDoc(doc(db, "members", user.uid), memberData);
+      debugLog("Successfully saved to members collection", { uid: user.uid });
+    } catch (dbError) {
+      debugLog("Error saving to members collection", dbError);
+      throw new Error(`Failed to save member data: ${dbError.message}`);
+    }
+
     showMessage("Account Created Successfully", "signUpMessage");
+    debugLog("Registration completed successfully", { uid: user.uid });
+    
     setTimeout(() => {
       window.location.href = "index.html";
     }, 1000);
+
   } catch (error) {
-    console.error("❌ Sign-up Error:", error);
+    debugLog("Sign up error", error);
+    
     if (error.code === "auth/email-already-in-use") {
       showMessage("Email already exists!", "signUpMessage");
+    } else if (error.code === "auth/weak-password") {
+      showMessage("Password should be at least 6 characters", "signUpMessage");
+    } else if (error.code === "auth/invalid-email") {
+      showMessage("Invalid email address", "signUpMessage");
+    } else if (error.message.includes("Failed to save")) {
+      showMessage(error.message, "signUpMessage");
     } else {
       showMessage("Error: " + error.message, "signUpMessage");
     }
@@ -169,15 +207,20 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
+  debugLog("Sign in attempt", { email });
+
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    debugLog("User signed in", { uid: user.uid, email: user.email });
 
     const userDoc = await getDoc(doc(db, "users", user.uid));
+    debugLog("User document fetch result", { exists: userDoc.exists() });
 
     if (userDoc.exists()) {
       const userData = userDoc.data();
       const role = userData.role;
+      debugLog("User role", { role });
 
       if (role === "admin") {
         window.location.href = "admin-dashboard.html";
@@ -185,13 +228,18 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
         window.location.href = "user-dashboard.html";
       }
     } else {
+      debugLog("User document not found in database", { uid: user.uid });
       showMessage("User not found in the database", "signInMessage");
     }
 
     showMessage("Login Successful", "signInMessage");
   } catch (error) {
+    debugLog("Sign in error", error);
+    
     if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
       showMessage("Invalid email or password", "signInMessage");
+    } else if (error.code === "auth/invalid-email") {
+      showMessage("Invalid email address", "signInMessage");
     } else {
       showMessage("Error: " + error.message, "signInMessage");
     }
@@ -202,33 +250,66 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
 document.querySelectorAll(".fa-google").forEach((btn) => {
   btn.addEventListener("click", async () => {
     const provider = new GoogleAuthProvider();
+    debugLog("Google sign-in attempt");
 
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      debugLog("Google sign-in successful", { uid: user.uid, email: user.email });
 
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", user.uid), {
+        debugLog("New Google user, creating database records");
+        
+        const userData = {
           email: user.email,
           firstName: user.displayName?.split(" ")[0] || "",
           lastName: user.displayName?.split(" ")[1] || "",
           role: "member"
-        });
+        };
 
-        await setDoc(doc(db, "members", user.uid), {
+        const memberData = {
           email: user.email,
           firstName: user.displayName?.split(" ")[0] || "",
           lastName: user.displayName?.split(" ")[1] || "",
           createdAt: new Date().toISOString(),
           beneficiaries: []
-        });
+        };
+
+        await setDoc(doc(db, "users", user.uid), userData);
+        await setDoc(doc(db, "members", user.uid), memberData);
+        
+        debugLog("Google user data saved successfully");
       }
 
       window.location.href = "user-dashboard.html";
     } catch (error) {
+      debugLog("Google Sign-In Error", error);
       console.error("Google Sign-In Error:", error);
       alert("Google Sign-In failed: " + error.message);
     }
   });
+});
+
+// Add a function to test database connectivity
+window.testDatabaseConnection = async () => {
+  try {
+    debugLog("Testing database connection");
+    const testDocRef = doc(db, "test", "connection");
+    await setDoc(testDocRef, { 
+      timestamp: new Date().toISOString(),
+      test: "Database connection successful"
+    });
+    debugLog("Database connection test successful");
+    alert("Database connection is working!");
+  } catch (error) {
+    debugLog("Database connection test failed", error);
+    alert("Database connection failed: " + error.message);
+  }
+};
+
+// Log Firebase initialization
+debugLog("Firebase initialized", { 
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain 
 });
