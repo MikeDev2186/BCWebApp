@@ -12,6 +12,12 @@ import {
   getDoc,
   setDoc
 } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -28,8 +34,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-// Helper to show messages
+// Show messages
 function showMessage(message, divId) {
   const messageDiv = document.getElementById(divId);
   if (messageDiv) {
@@ -42,7 +49,7 @@ function showMessage(message, divId) {
   }
 }
 
-// Helper to collect beneficiary data
+// Collect beneficiaries
 function getBeneficiaries() {
   const container = document.getElementById("beneficiaries");
   if (!container) return [];
@@ -65,6 +72,13 @@ function getBeneficiaries() {
   return beneficiaries;
 }
 
+// Upload file to Firebase Storage
+async function uploadDocument(userId, file) {
+  const fileRef = ref(storage, `documents/${userId}/${file.name}`);
+  await uploadBytes(fileRef, file);
+  return await getDownloadURL(fileRef);
+}
+
 // Sign Up
 document.getElementById("submitSignUp").addEventListener("click", async (event) => {
   event.preventDefault();
@@ -73,12 +87,25 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
   const password = document.getElementById("rPassword").value;
   const firstName = document.getElementById("fName").value.trim();
   const lastName = document.getElementById("lName").value.trim();
+  const barangay = document.getElementById("barangay").value;
+  const file = document.getElementById("validDocument").files[0];
+
+  if (barangay !== "Commonwealth") {
+    showMessage("Registration restricted to Barangay Commonwealth only", "signUpMessage");
+    return;
+  }
+
+  if (!file) {
+    showMessage("You must upload a valid ID or birth certificate.", "signUpMessage");
+    return;
+  }
 
   try {
     const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
     const user = signUpResult.user;
 
     const role = "member";
+    const documentURL = await uploadDocument(user.uid, file);
 
     // Save to "users" collection
     await setDoc(doc(db, "users", user.uid), {
@@ -88,14 +115,14 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       role
     });
 
-    // Additional Profile Data
+    // Optional fields
     const phone = document.getElementById("phone")?.value || "";
     const address = document.getElementById("address")?.value || "";
     const dob = document.getElementById("dob")?.value || "";
     const maritalStatus = document.getElementById("maritalStatus")?.value || "";
     const beneficiaries = getBeneficiaries();
 
-    // Save full profile to "members" collection
+    // Save to "members" collection
     await setDoc(doc(db, "members", user.uid), {
       email,
       firstName,
@@ -104,6 +131,8 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       address,
       dob,
       maritalStatus,
+      barangay,
+      documentURL,
       beneficiaries,
       createdAt: new Date().toISOString()
     });
@@ -168,7 +197,6 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
 
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
-        // Create user in Firestore if not exists
         await setDoc(doc(db, "users", user.uid), {
           email: user.email,
           firstName: user.displayName?.split(" ")[0] || "",
@@ -176,7 +204,6 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
           role: "member"
         });
 
-        // Also store minimal member profile
         await setDoc(doc(db, "members", user.uid), {
           email: user.email,
           firstName: user.displayName?.split(" ")[0] || "",
