@@ -74,9 +74,17 @@ function getBeneficiaries() {
 
 // Upload file to Firebase Storage
 async function uploadDocument(userId, file) {
-  const fileRef = ref(storage, `documents/${userId}/${file.name}`);
-  await uploadBytes(fileRef, file);
-  return await getDownloadURL(fileRef);
+  try {
+    const fileRef = ref(storage, `documents/${userId}/${file.name}`);
+    await uploadBytes(fileRef, file);
+    const downloadURL = await getDownloadURL(fileRef);
+    console.log("✅ File uploaded:", downloadURL);
+    return downloadURL;
+  } catch (err) {
+    console.error("❌ Upload failed:", err);
+    showMessage("File upload failed. Try again.", "signUpMessage");
+    throw err;
+  }
 }
 
 // Sign Up
@@ -101,13 +109,17 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
   }
 
   try {
+    console.log("📧 Creating user account...");
     const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
     const user = signUpResult.user;
+    console.log("✅ User created:", user.uid);
 
     const role = "member";
+
+    console.log("📤 Uploading document...");
     const documentURL = await uploadDocument(user.uid, file);
 
-    // Save to "users" collection
+    console.log("📝 Saving user data to Firestore...");
     await setDoc(doc(db, "users", user.uid), {
       email,
       firstName,
@@ -115,14 +127,12 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       role
     });
 
-    // Optional fields
     const phone = document.getElementById("phone")?.value || "";
     const address = document.getElementById("address")?.value || "";
     const dob = document.getElementById("dob")?.value || "";
     const maritalStatus = document.getElementById("maritalStatus")?.value || "";
     const beneficiaries = getBeneficiaries();
 
-    // Save to "members" collection
     await setDoc(doc(db, "members", user.uid), {
       email,
       firstName,
@@ -137,11 +147,13 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       createdAt: new Date().toISOString()
     });
 
+    console.log("✅ Firestore save complete.");
     showMessage("Account Created Successfully", "signUpMessage");
     setTimeout(() => {
       window.location.href = "index.html";
     }, 1000);
   } catch (error) {
+    console.error("❌ Sign-up Error:", error);
     if (error.code === "auth/email-already-in-use") {
       showMessage("Email already exists!", "signUpMessage");
     } else {
