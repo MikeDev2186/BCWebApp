@@ -250,28 +250,26 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
         debugLog("New Google user, creating database records");
-        
-        const userData = {
-          email: user.email,
-          firstName: user.displayName?.split(" ")[0] || "",
-          lastName: user.displayName?.split(" ")[1] || "",
-          role: "member"
-        };
-
+        const firstName = user.displayName?.split(" ")[0] || "";
+        const lastName = user.displayName?.split(" ")[1] || "";
         const memberData = {
           email: user.email,
-          firstName: user.displayName?.split(" ")[0] || "",
-          lastName: user.displayName?.split(" ")[1] || "",
+          firstName,
+          lastName,
+          phone: "",
+          address: "",
+          dob: "",
+          maritalStatus: "",
+          barangay: "Commonwealth",
+          documentURL: "",
+          beneficiaries: [],
           createdAt: new Date().toISOString(),
-          beneficiaries: []
+          role: "member"
         };
-
-        await setDoc(doc(db, "users", user.uid), userData);
+        await setDoc(doc(db, "users", user.uid), memberData);
         await setDoc(doc(db, "members", user.uid), memberData);
-        
         debugLog("Google user data saved successfully");
       }
-
       window.location.href = "user-dashboard.html";
     } catch (error) {
       debugLog("Google Sign-In Error", error);
