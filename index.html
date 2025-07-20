@@ -7,9 +7,8 @@
 
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css" />
   <script type="module" src="firebaseauth.js"></script>
-
-  <style>
     :root {
       --bg-color: #f0f2f5;
       --card-color: #ffffff;
@@ -218,18 +217,18 @@
   </style>
 </head>
 <body>
-  <button class="toggle-theme" onclick="toggleTheme()">
-    <i class="fas fa-moon"></i>
+  <button class="toggle-theme" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <i class="fas fa-moon" aria-hidden="true"></i>
   </button>
 
   <header>
-    Barangay Commonwealth Portal
+    <span aria-label="Site Title">Barangay Commonwealth Portal</span>
   </header>
 
-  <div class="container">
+  <main class="container" role="main">
     <!-- Register Form -->
     <div class="form-wrapper" id="signup">
-      <h2 class="form-title">Register</h2>
+      <h2 class="form-title" tabindex="0">Register</h2>
       <form id="registerForm">
   <div id="signUpMessage" class="messageDiv" style="display: none;"></div>
 
@@ -285,7 +284,7 @@
 
     <!-- Login Form -->
     <div class="form-wrapper active" id="signIn">
-      <h2 class="form-title">Sign In</h2>
+      <h2 class="form-title" tabindex="0">Sign In</h2>
       <form id="loginForm">
         <div id="signInMessage" class="messageDiv" style="display: none;"></div>
         <div class="input-group">
@@ -319,6 +318,7 @@
       document.getElementById('signIn').classList.remove('active');
       document.getElementById('signup').classList.remove('active');
       document.getElementById(formId).classList.add('active');
+      document.getElementById(formId).querySelector('input, select').focus();
     }
 
     function toggleTheme() {
