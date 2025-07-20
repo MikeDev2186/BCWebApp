@@ -38,7 +38,7 @@ const storage = getStorage(app);
 
 // Debug function to log database operations
 function debugLog(operation, data) {
-  console.log(`[DEBUG] ${operation}:`, data);
+  console.log([DEBUG] ${operation}:, data);
 }
 
 // Show messages
@@ -81,7 +81,7 @@ function getBeneficiaries() {
 async function uploadDocument(userId, file) {
   try {
     debugLog("Starting file upload", { userId, fileName: file.name });
-    const fileRef = ref(storage, `documents/${userId}/${file.name}`);
+    const fileRef = ref(storage, documents/${userId}/${file.name});
     const snapshot = await uploadBytes(fileRef, file);
     debugLog("File uploaded successfully", snapshot);
     const downloadURL = await getDownloadURL(fileRef);
@@ -142,7 +142,7 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       debugLog("Successfully saved to users collection", { uid: user.uid });
     } catch (dbError) {
       debugLog("Error saving to users collection", dbError);
-      throw new Error(`Failed to save user data: ${dbError.message}`);
+      throw new Error(Failed to save user data: ${dbError.message});
     }
 
     // Step 5: Prepare member data
@@ -173,7 +173,7 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       debugLog("Successfully saved to members collection", { uid: user.uid });
     } catch (dbError) {
       debugLog("Error saving to members collection", dbError);
-      throw new Error(`Failed to save member data: ${dbError.message}`);
+      throw new Error(Failed to save member data: ${dbError.message});
     }
 
     showMessage("Account Created Successfully", "signUpMessage");
@@ -201,93 +201,50 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
 });
 
 // Sign In
-document.getElementById("submitSignUp").addEventListener("click", async (event) => {
+document.getElementById("submitSignIn").addEventListener("click", async (event) => {
   event.preventDefault();
 
-  const email = document.getElementById("rEmail").value.trim();
-  const password = document.getElementById("rPassword").value;
-  const firstName = document.getElementById("fName").value.trim();
-  const lastName = document.getElementById("lName").value.trim();
-  const barangay = document.getElementById("barangay").value;
-  const file = document.getElementById("validDocument").files[0];
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-  debugLog("Sign up attempt", { email, firstName, lastName, barangay, hasFile: !!file });
-
-  if (barangay !== "Commonwealth") {
-    showMessage("Registration restricted to Barangay Commonwealth only", "signUpMessage");
-    return;
-  }
-
-  if (!file) {
-    showMessage("You must upload a valid ID or birth certificate.", "signUpMessage");
-    return;
-  }
+  debugLog("Sign in attempt", { email });
 
   try {
-    const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
-    const user = signUpResult.user;
-    debugLog("User account created", { uid: user.uid, email: user.email });
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    debugLog("User signed in", { uid: user.uid, email: user.email });
 
-    const documentURL = await uploadDocument(user.uid, file);
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    debugLog("User document fetch result", { exists: userDoc.exists() });
 
-    const role = "member";
-    const userData = {
-      email,
-      firstName,
-      lastName,
-      role
-    };
-    debugLog("Saving to users collection", userData);
-    await setDoc(doc(db, "users", user.uid), userData);
-    debugLog("Saved to users collection");
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      const role = userData.role;
+      debugLog("User role", { role });
 
-    const phone = document.getElementById("phone")?.value || "";
-    const address = document.getElementById("address")?.value || "";
-    const dob = document.getElementById("dob")?.value || "";
-    const maritalStatus = document.getElementById("maritalStatus")?.value || "";
-    const beneficiaries = getBeneficiaries();
-
-    const memberData = {
-      email,
-      firstName,
-      lastName,
-      phone,
-      address,
-      dob,
-      maritalStatus,
-      barangay,
-      documentURL,
-      beneficiaries,
-      createdAt: new Date().toISOString()
-    };
-    debugLog("Saving to members collection", memberData);
-    await setDoc(doc(db, "members", user.uid), memberData);
-    debugLog("Saved to members collection");
-
-    showMessage("Review in progress. You'll receive a confirmation email after validation", "signUpMessage");
-
-    // Delay redirect to ensure all async writes complete
-    setTimeout(() => {
-      window.location.assign("index.html");
-    }, 2000);
-
-  } catch (error) {
-    debugLog("Sign up error", error);
-
-    if (error.code === "auth/email-already-in-use") {
-      showMessage("Email already exists!", "signUpMessage");
-    } else if (error.code === "auth/weak-password") {
-      showMessage("Password should be at least 6 characters", "signUpMessage");
-    } else if (error.code === "auth/invalid-email") {
-      showMessage("Invalid email address", "signUpMessage");
-    } else if (error.message.includes("Failed to save")) {
-      showMessage(error.message, "signUpMessage");
+      if (role === "admin") {
+        window.location.href = "admin-dashboard.html";
+      } else {
+        window.location.href = "user-dashboard.html";
+      }
     } else {
-      showMessage("Error: " + error.message, "signUpMessage");
+      debugLog("User document not found in database", { uid: user.uid });
+      showMessage("User not found in the database", "signInMessage");
+    }
+
+    showMessage("Login Successful", "signInMessage");
+  } catch (error) {
+    debugLog("Sign in error", error);
+    
+    if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+      showMessage("Invalid email or password", "signInMessage");
+    } else if (error.code === "auth/invalid-email") {
+      showMessage("Invalid email address", "signInMessage");
+    } else {
+      showMessage("Error: " + error.message, "signInMessage");
     }
   }
 });
-
 
 // Google Sign-In
 document.querySelectorAll(".fa-google").forEach((btn) => {
