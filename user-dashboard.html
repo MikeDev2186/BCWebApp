@@ -232,16 +232,37 @@
   };
 
   window.showSection = function(section) {
-    // Hide all section panels
     document.querySelectorAll('.section-panel').forEach(panel => {
       panel.style.display = 'none';
     });
-    // Show the selected section
     const activePanel = document.getElementById(`section-${section}`);
     if (activePanel) {
       activePanel.style.display = '';
     }
   };
+
+  // Contact Us form Firestore handler
+  const contactForm = document.getElementById('contactUsForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('contactName').value.trim();
+      const email = document.getElementById('contactEmail').value.trim();
+      const message = document.getElementById('contactMessage').value.trim();
+      try {
+        await setDoc(doc(db, 'queries', `${Date.now()}_${email}`), {
+          name,
+          email,
+          message,
+          sentAt: new Date().toISOString()
+        });
+        alert('Your message has been sent to the admin.');
+        contactForm.reset();
+      } catch (error) {
+        alert('Failed to send message: ' + error.message);
+      }
+    });
+  }
 </script>
 
 </body>
