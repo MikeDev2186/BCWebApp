@@ -264,7 +264,7 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
     await setDoc(doc(db, "members", user.uid), memberData);
     debugLog("Saved to members collection");
 
-    showMessage("Account Created Successfully", "signUpMessage");
+    showMessage("Review in progress. You'll receive a confirmation email after validation", "signUpMessage");
 
     // Delay redirect to ensure all async writes complete
     setTimeout(() => {
