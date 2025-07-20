@@ -38,7 +38,7 @@ const storage = getStorage(app);
 
 // Debug function to log database operations
 function debugLog(operation, data) {
-  console.log([DEBUG] ${operation}:, data);
+  console.log(`[DEBUG] ${operation}:`, data);
 }
 
 // Show messages
@@ -81,7 +81,7 @@ function getBeneficiaries() {
 async function uploadDocument(userId, file) {
   try {
     debugLog("Starting file upload", { userId, fileName: file.name });
-    const fileRef = ref(storage, documents/${userId}/${file.name});
+    const fileRef = ref(storage, `documents/${userId}/${file.name}`);
     const snapshot = await uploadBytes(fileRef, file);
     debugLog("File uploaded successfully", snapshot);
     const downloadURL = await getDownloadURL(fileRef);
@@ -126,32 +126,14 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
     // Step 2: Upload document
     const documentURL = await uploadDocument(user.uid, file);
 
-    // Step 3: Prepare user data
-    const role = "member";
-    const userData = {
-      email,
-      firstName,
-      lastName,
-      role
-    };
-    debugLog("Preparing to save user data", userData);
 
-    // Step 4: Save to "users" collection
-    try {
-      await setDoc(doc(db, "users", user.uid), userData);
-      debugLog("Successfully saved to users collection", { uid: user.uid });
-    } catch (dbError) {
-      debugLog("Error saving to users collection", dbError);
-      throw new Error(Failed to save user data: ${dbError.message});
-    }
-
-    // Step 5: Prepare member data
+    // Step 3: Prepare full member data
     const phone = document.getElementById("phone")?.value || "";
     const address = document.getElementById("address")?.value || "";
     const dob = document.getElementById("dob")?.value || "";
     const maritalStatus = document.getElementById("maritalStatus")?.value || "";
     const beneficiaries = getBeneficiaries();
-
+    const role = "member";
     const memberData = {
       email,
       firstName,
@@ -163,17 +145,25 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
       barangay,
       documentURL,
       beneficiaries,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      role
     };
     debugLog("Preparing to save member data", memberData);
 
-    // Step 6: Save to "members" collection
+    // Step 4: Save to both "users" and "members" collections
+    try {
+      await setDoc(doc(db, "users", user.uid), memberData);
+      debugLog("Successfully saved to users collection", { uid: user.uid });
+    } catch (dbError) {
+      debugLog("Error saving to users collection", dbError);
+      throw new Error(`Failed to save user data: ${dbError.message}`);
+    }
     try {
       await setDoc(doc(db, "members", user.uid), memberData);
       debugLog("Successfully saved to members collection", { uid: user.uid });
     } catch (dbError) {
       debugLog("Error saving to members collection", dbError);
-      throw new Error(Failed to save member data: ${dbError.message});
+      throw new Error(`Failed to save member data: ${dbError.message}`);
     }
 
     showMessage("Account Created Successfully", "signUpMessage");
@@ -217,25 +207,25 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
     const userDoc = await getDoc(doc(db, "users", user.uid));
     debugLog("User document fetch result", { exists: userDoc.exists() });
 
+    let role = "member";
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      const role = userData.role;
+      role = userData.role || "member";
       debugLog("User role", { role });
-
-      if (role === "admin") {
-        window.location.href = "admin-dashboard.html";
-      } else {
-        window.location.href = "user-dashboard.html";
-      }
     } else {
-      debugLog("User document not found in database", { uid: user.uid });
-      showMessage("User not found in the database", "signInMessage");
+      debugLog("User document not found in database, defaulting to member dashboard", { uid: user.uid });
+    }
+
+    if (role === "admin") {
+      window.location.href = "admin-dashboard.html";
+    } else {
+      window.location.href = "user-dashboard.html";
     }
 
     showMessage("Login Successful", "signInMessage");
   } catch (error) {
     debugLog("Sign in error", error);
-    
+    console.error("Sign in error:", error);
     if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
       showMessage("Invalid email or password", "signInMessage");
     } else if (error.code === "auth/invalid-email") {
