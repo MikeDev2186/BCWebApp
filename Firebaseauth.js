@@ -1,194 +1,305 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Admin Dashboard - All Members</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: #f4f7fa;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #00796b;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    .dashboard-container {
-      max-width: 1000px;
-      margin: 30px auto;
-      background-color: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-      color: #00796b;
-      margin-bottom: 20px;
-    }
-    #searchInput {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #00796b;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    button.export {
-      background-color: #00796b;
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    button.export:hover {
-      background-color: #004d40;
-    }
-  </style>
-</head>
-<body>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js";
 
-<header>
-  <h1>Admin Dashboard - All Members</h1>
-</header>
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
+  authDomain: "npwebapp-c9ee3.firebaseapp.com",
+  projectId: "npwebapp-c9ee3",
+  storageBucket: "npwebapp-c9ee3.appspot.com",
+  messagingSenderId: "149339991351",
+  appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
+  measurementId: "G-X761ZGHTSH"
+};
 
-<div class="dashboard-container">
-  <h2>Registered Members</h2>
-  <input type="text" id="searchInput" placeholder="Search members by name or email...">
-  <table id="membersTable">
-    <thead>
-      <tr>
-        <th>Full Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Address</th>
-        <th>Date of Birth</th>
-        <th>Marital Status</th>
-        <th>Beneficiaries</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button class="export" onclick="exportToCSV()">Export to CSV</button>
-</div>
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-  import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+// Debug function to log database operations
+function debugLog(operation, data) {
+  console.log(`[DEBUG] ${operation}:`, data);
+}
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
-    authDomain: "npwebapp-c9ee3.firebaseapp.com",
-    projectId: "npwebapp-c9ee3",
-    storageBucket: "npwebapp-c9ee3.appspot.com",
-    messagingSenderId: "149339991351",
-    appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
-    measurementId: "G-X761ZGHTSH"
-  };
+// Show messages
+function showMessage(message, divId) {
+  const messageDiv = document.getElementById(divId);
+  if (messageDiv) {
+    messageDiv.innerText = message;
+    messageDiv.style.display = "block";
+    messageDiv.style.opacity = 1;
+    setTimeout(() => {
+      messageDiv.style.opacity = 0;
+    }, 4000);
+  }
+}
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+// Collect beneficiaries
+function getBeneficiaries() {
+  const container = document.getElementById("beneficiaries");
+  if (!container) return [];
 
-  const membersTableBody = document.querySelector("#membersTable tbody");
-  const searchInput = document.getElementById("searchInput");
-  let allMembers = [];
+  const groups = container.querySelectorAll(".form-group");
+  const beneficiaries = [];
 
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      await loadAllMembers();
-    } else {
-      alert("Not logged in.");
-      window.location.href = "index.html";
+  groups.forEach(group => {
+    const name = group.querySelector('[name="beneficiaryName"]')?.value || "";
+    const relationship = group.querySelector('[name="beneficiaryRelationship"]')?.value || "";
+    const age = group.querySelector('[name="beneficiaryAge"]')?.value || "";
+    const pwd = group.querySelector('[name="beneficiaryPWD"]')?.checked || false;
+    const senior = group.querySelector('[name="beneficiarySenior"]')?.checked || false;
+
+    if (name && relationship && age) {
+      beneficiaries.push({ name, relationship, age: parseInt(age), pwd, senior });
     }
   });
 
-  async function loadAllMembers() {
+  return beneficiaries;
+}
+
+// Upload file to Firebase Storage
+async function uploadDocument(userId, file) {
+  try {
+    debugLog("Starting file upload", { userId, fileName: file.name });
+    const fileRef = ref(storage, `documents/${userId}/${file.name}`);
+    const snapshot = await uploadBytes(fileRef, file);
+    debugLog("File uploaded successfully", snapshot);
+    const downloadURL = await getDownloadURL(fileRef);
+    debugLog("Download URL obtained", downloadURL);
+    return downloadURL;
+  } catch (error) {
+    debugLog("File upload error", error);
+    throw error;
+  }
+}
+
+// Sign Up
+document.getElementById("submitSignUp").addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById("rEmail").value.trim();
+  const password = document.getElementById("rPassword").value;
+  const firstName = document.getElementById("fName").value.trim();
+  const lastName = document.getElementById("lName").value.trim();
+  const barangay = document.getElementById("barangay").value;
+  const file = document.getElementById("validDocument").files[0];
+
+  debugLog("Sign up attempt", { email, firstName, lastName, barangay, hasFile: !!file });
+
+  if (barangay !== "Commonwealth") {
+    showMessage("Registration restricted to Barangay Commonwealth only", "signUpMessage");
+    return;
+  }
+
+  if (!file) {
+    showMessage("You must upload a valid ID or birth certificate.", "signUpMessage");
+    return;
+  }
+
+  try {
+    // Step 1: Create user account
+    debugLog("Creating user account", { email });
+    const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
+    const user = signUpResult.user;
+    debugLog("User account created", { uid: user.uid, email: user.email });
+
+    // Step 2: Upload document
+    const documentURL = await uploadDocument(user.uid, file);
+
+
+    // Step 3: Prepare full member data
+    const phone = document.getElementById("phone")?.value || "";
+    const address = document.getElementById("address")?.value || "";
+    const dob = document.getElementById("dob")?.value || "";
+    const maritalStatus = document.getElementById("maritalStatus")?.value || "";
+    const beneficiaries = getBeneficiaries();
+    const role = "member";
+    const memberData = {
+      email,
+      firstName,
+      lastName,
+      phone,
+      address,
+      dob,
+      maritalStatus,
+      barangay,
+      documentURL,
+      beneficiaries,
+      createdAt: new Date().toISOString(),
+      role
+    };
+    debugLog("Preparing to save member data", memberData);
+
+    // Step 4: Save to both "users" and "members" collections
     try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      allMembers = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        allMembers.push(data);
-      });
-      renderTable(allMembers);
-    } catch (error) {
-      console.error("Error loading members:", error);
-      alert("Failed to load member list.");
+      await setDoc(doc(db, "users", user.uid), memberData);
+      debugLog("Successfully saved to users collection", { uid: user.uid });
+    } catch (dbError) {
+      debugLog("Error saving to users collection", dbError);
+      throw new Error(`Failed to save user data: ${dbError.message}`);
+    }
+    try {
+      await setDoc(doc(db, "members", user.uid), memberData);
+      debugLog("Successfully saved to members collection", { uid: user.uid });
+    } catch (dbError) {
+      debugLog("Error saving to members collection", dbError);
+      throw new Error(`Failed to save member data: ${dbError.message}`);
+    }
+
+    showMessage("Account Created Successfully", "signUpMessage");
+    debugLog("Registration completed successfully", { uid: user.uid });
+    
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1000);
+
+  } catch (error) {
+    debugLog("Sign up error", error);
+    
+    if (error.code === "auth/email-already-in-use") {
+      showMessage("Email already exists!", "signUpMessage");
+    } else if (error.code === "auth/weak-password") {
+      showMessage("Password should be at least 6 characters", "signUpMessage");
+    } else if (error.code === "auth/invalid-email") {
+      showMessage("Invalid email address", "signUpMessage");
+    } else if (error.message.includes("Failed to save")) {
+      showMessage(error.message, "signUpMessage");
+    } else {
+      showMessage("Error: " + error.message, "signUpMessage");
     }
   }
+});
 
-  function renderTable(members) {
-    membersTableBody.innerHTML = "";
-    members.forEach(data => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${data.fullName || ""}</td>
-        <td>${data.email || ""}</td>
-        <td>${data.phone || ""}</td>
-        <td>${data.address || ""}</td>
-        <td>${data.dob || ""}</td>
-        <td>${data.maritalStatus || ""}</td>
-        <td><ul>${(data.beneficiaries || []).map(b => `<li>${b}</li>`).join("")}</ul></td>
-      `;
-      membersTableBody.appendChild(row);
-    });
+// Sign In
+document.getElementById("submitSignIn").addEventListener("click", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  debugLog("Sign in attempt", { email });
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    debugLog("User signed in", { uid: user.uid, email: user.email });
+
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    debugLog("User document fetch result", { exists: userDoc.exists() });
+
+    let role = "member";
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      role = userData.role || "member";
+      debugLog("User role", { role });
+    } else {
+      debugLog("User document not found in database, defaulting to member dashboard", { uid: user.uid });
+    }
+
+    if (role === "admin") {
+      window.location.href = "admin-dashboard.html";
+    } else {
+      window.location.href = "user-dashboard.html";
+    }
+
+    showMessage("Login Successful", "signInMessage");
+  } catch (error) {
+    debugLog("Sign in error", error);
+    console.error("Sign in error:", error);
+    if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
+      showMessage("Invalid email or password", "signInMessage");
+    } else if (error.code === "auth/invalid-email") {
+      showMessage("Invalid email address", "signInMessage");
+    } else {
+      showMessage("Error: " + error.message, "signInMessage");
+    }
   }
+});
 
-  searchInput.addEventListener("input", () => {
-    const keyword = searchInput.value.toLowerCase();
-    const filtered = allMembers.filter(m =>
-      (m.fullName || "").toLowerCase().includes(keyword) ||
-      (m.email || "").toLowerCase().includes(keyword)
-    );
-    renderTable(filtered);
+// Google Sign-In
+document.querySelectorAll(".fa-google").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+    debugLog("Google sign-in attempt");
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      debugLog("Google sign-in successful", { uid: user.uid, email: user.email });
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        debugLog("New Google user, creating database records");
+        
+        const userData = {
+          email: user.email,
+          firstName: user.displayName?.split(" ")[0] || "",
+          lastName: user.displayName?.split(" ")[1] || "",
+          role: "member"
+        };
+
+        const memberData = {
+          email: user.email,
+          firstName: user.displayName?.split(" ")[0] || "",
+          lastName: user.displayName?.split(" ")[1] || "",
+          createdAt: new Date().toISOString(),
+          beneficiaries: []
+        };
+
+        await setDoc(doc(db, "users", user.uid), userData);
+        await setDoc(doc(db, "members", user.uid), memberData);
+        
+        debugLog("Google user data saved successfully");
+      }
+
+      window.location.href = "user-dashboard.html";
+    } catch (error) {
+      debugLog("Google Sign-In Error", error);
+      console.error("Google Sign-In Error:", error);
+      alert("Google Sign-In failed: " + error.message);
+    }
   });
+});
 
-  window.exportToCSV = function () {
-    const headers = ["Full Name", "Email", "Phone", "Address", "Date of Birth", "Marital Status", "Beneficiaries"];
-    const rows = allMembers.map(m => [
-      m.fullName || "",
-      m.email || "",
-      m.phone || "",
-      m.address || "",
-      m.dob || "",
-      m.maritalStatus || "",
-      (m.beneficiaries || []).join(" | ")
-    ]);
-    let csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "member_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+// Add a function to test database connectivity
+window.testDatabaseConnection = async () => {
+  try {
+    debugLog("Testing database connection");
+    const testDocRef = doc(db, "test", "connection");
+    await setDoc(testDocRef, { 
+      timestamp: new Date().toISOString(),
+      test: "Database connection successful"
+    });
+    debugLog("Database connection test successful");
+    alert("Database connection is working!");
+  } catch (error) {
+    debugLog("Database connection test failed", error);
+    alert("Database connection failed: " + error.message);
   }
-</script>
+};
 
-</body>
-</html>
+// Log Firebase initialization
+debugLog("Firebase initialized", { 
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain 
+});
