@@ -1,4 +1,3 @@
-
 :root {
   --bg-color: #f0f2f5;
   --card-color: #ffffff;
@@ -26,6 +25,11 @@ body {
   align-items: flex-start;
   transition: background-color 0.3s, color 0.3s;
   padding-top: 70px;
+  /* Barangay Commonwealth building background */
+  background-image: url('../Capstone 2/Background.JPG');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 header {
