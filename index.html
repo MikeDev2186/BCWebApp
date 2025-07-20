@@ -70,6 +70,8 @@
         <button class="btn facebook-btn"><i class="fab fa-facebook-f"></i> Facebook</button>
       </div>
 
+
+
     <!-- Login Form -->
     <div class="form-wrapper active" id="signIn">
       <h2 class="form-title" tabindex="0">Sign In</h2>
@@ -88,7 +90,18 @@
         <button class="btn" id="submitSignIn">Sign In</button>
       </form>
 
+      <div class="google-signin">
+        <p>Or sign in with</p>
+        <button class="btn google-btn"><i class="fab fa-google"></i> Google</button>
+        <button class="btn facebook-btn"><i class="fab fa-facebook-f"></i> Facebook</button>
+      </div>
 
+      <div class="alt-links">
+        <p>Don't have an account?</p>
+        <button onclick="switchForm('signup')">Sign Up</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     function switchForm(formId) {
