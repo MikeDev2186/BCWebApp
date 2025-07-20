@@ -249,6 +249,26 @@
       const name = document.getElementById('contactName').value.trim();
       const email = document.getElementById('contactEmail').value.trim();
       const message = document.getElementById('contactMessage').value.trim();
+      // Check if user is registered and barangay is Commonwealth
+      let isCommonwealth = false;
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if ((userData.barangay || '').toLowerCase() === 'commonwealth') {
+              isCommonwealth = true;
+            }
+          }
+        }
+      } catch (error) {
+        // ignore, will block below
+      }
+      if (!isCommonwealth) {
+        alert('Only registered Barangay Commonwealth residents can send queries.');
+        return;
+      }
       try {
         await setDoc(doc(db, 'queries', `${Date.now()}_${email}`), {
           name,
