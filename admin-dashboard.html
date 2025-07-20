@@ -72,33 +72,55 @@
 <body>
 
 <header>
-  <h1>Admin Dashboard - All Members</h1>
+  <h1>Admin Dashboard</h1>
 </header>
 
 <div class="dashboard-container">
-  <h2>Registered Members</h2>
-  <input type="text" id="searchInput" placeholder="Search members by name or email...">
-  <table id="membersTable">
-    <thead>
-      <tr>
-        <th>Full Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Address</th>
-        <th>Date of Birth</th>
-        <th>Marital Status</th>
-        <th>Beneficiaries</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <button class="export" onclick="exportToCSV()">Export to CSV</button>
+  <nav style="margin-bottom: 2rem;">
+    <button onclick="showAdminSection('members')">Registered Members</button>
+    <button onclick="showAdminSection('queries')">User Queries</button>
+  </nav>
+
+  <div id="admin-section-members">
+    <h2>Registered Members</h2>
+    <input type="text" id="searchInput" placeholder="Search members by name or email...">
+    <table id="membersTable">
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Date of Birth</th>
+          <th>Marital Status</th>
+          <th>Beneficiaries</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="export" onclick="exportToCSV()">Export to CSV</button>
+  </div>
+
+  <div id="admin-section-queries" style="display:none">
+    <h2>User Queries</h2>
+    <table id="queriesTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Message</th>
+          <th>Sent At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-  import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
@@ -115,17 +137,52 @@
   const db = getFirestore(app);
 
   const membersTableBody = document.querySelector("#membersTable tbody");
+  const queriesTableBody = document.querySelector("#queriesTable tbody");
   const searchInput = document.getElementById("searchInput");
   let allMembers = [];
+  let allQueries = [];
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       await loadAllMembers();
+      await loadAllQueries();
     } else {
       alert("Not logged in.");
       window.location.href = "index.html";
     }
   });
+  async function loadAllQueries() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "queries"));
+      allQueries = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        allQueries.push(data);
+      });
+      renderQueriesTable(allQueries);
+    } catch (error) {
+      console.error("Error loading queries:", error);
+      alert("Failed to load user queries.");
+    }
+  }
+
+  function renderQueriesTable(queries) {
+    queriesTableBody.innerHTML = "";
+    queries.forEach(data => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${data.name || ""}</td>
+        <td>${data.email || ""}</td>
+        <td>${data.message || ""}</td>
+        <td>${data.sentAt ? new Date(data.sentAt).toLocaleString() : ""}</td>
+      `;
+      queriesTableBody.appendChild(row);
+    });
+  }
+  window.showAdminSection = function(section) {
+    document.getElementById('admin-section-members').style.display = section === 'members' ? '' : 'none';
+    document.getElementById('admin-section-queries').style.display = section === 'queries' ? '' : 'none';
+  }
 
   async function loadAllMembers() {
     try {
