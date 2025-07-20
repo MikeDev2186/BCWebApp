@@ -201,50 +201,93 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
 });
 
 // Sign In
-document.getElementById("submitSignIn").addEventListener("click", async (event) => {
+document.getElementById("submitSignUp").addEventListener("click", async (event) => {
   event.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("rEmail").value.trim();
+  const password = document.getElementById("rPassword").value;
+  const firstName = document.getElementById("fName").value.trim();
+  const lastName = document.getElementById("lName").value.trim();
+  const barangay = document.getElementById("barangay").value;
+  const file = document.getElementById("validDocument").files[0];
 
-  debugLog("Sign in attempt", { email });
+  debugLog("Sign up attempt", { email, firstName, lastName, barangay, hasFile: !!file });
+
+  if (barangay !== "Commonwealth") {
+    showMessage("Registration restricted to Barangay Commonwealth only", "signUpMessage");
+    return;
+  }
+
+  if (!file) {
+    showMessage("You must upload a valid ID or birth certificate.", "signUpMessage");
+    return;
+  }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    debugLog("User signed in", { uid: user.uid, email: user.email });
+    const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
+    const user = signUpResult.user;
+    debugLog("User account created", { uid: user.uid, email: user.email });
 
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    debugLog("User document fetch result", { exists: userDoc.exists() });
+    const documentURL = await uploadDocument(user.uid, file);
 
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      const role = userData.role;
-      debugLog("User role", { role });
+    const role = "member";
+    const userData = {
+      email,
+      firstName,
+      lastName,
+      role
+    };
+    debugLog("Saving to users collection", userData);
+    await setDoc(doc(db, "users", user.uid), userData);
+    debugLog("Saved to users collection");
 
-      if (role === "admin") {
-        window.location.href = "admin-dashboard.html";
-      } else {
-        window.location.href = "user-dashboard.html";
-      }
-    } else {
-      debugLog("User document not found in database", { uid: user.uid });
-      showMessage("User not found in the database", "signInMessage");
-    }
+    const phone = document.getElementById("phone")?.value || "";
+    const address = document.getElementById("address")?.value || "";
+    const dob = document.getElementById("dob")?.value || "";
+    const maritalStatus = document.getElementById("maritalStatus")?.value || "";
+    const beneficiaries = getBeneficiaries();
 
-    showMessage("Login Successful", "signInMessage");
+    const memberData = {
+      email,
+      firstName,
+      lastName,
+      phone,
+      address,
+      dob,
+      maritalStatus,
+      barangay,
+      documentURL,
+      beneficiaries,
+      createdAt: new Date().toISOString()
+    };
+    debugLog("Saving to members collection", memberData);
+    await setDoc(doc(db, "members", user.uid), memberData);
+    debugLog("Saved to members collection");
+
+    showMessage("Account Created Successfully", "signUpMessage");
+
+    // Delay redirect to ensure all async writes complete
+    setTimeout(() => {
+      window.location.assign("index.html");
+    }, 2000);
+
   } catch (error) {
-    debugLog("Sign in error", error);
-    
-    if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
-      showMessage("Invalid email or password", "signInMessage");
+    debugLog("Sign up error", error);
+
+    if (error.code === "auth/email-already-in-use") {
+      showMessage("Email already exists!", "signUpMessage");
+    } else if (error.code === "auth/weak-password") {
+      showMessage("Password should be at least 6 characters", "signUpMessage");
     } else if (error.code === "auth/invalid-email") {
-      showMessage("Invalid email address", "signInMessage");
+      showMessage("Invalid email address", "signUpMessage");
+    } else if (error.message.includes("Failed to save")) {
+      showMessage(error.message, "signUpMessage");
     } else {
-      showMessage("Error: " + error.message, "signInMessage");
+      showMessage("Error: " + error.message, "signUpMessage");
     }
   }
 });
+
 
 // Google Sign-In
 document.querySelectorAll(".fa-google").forEach((btn) => {
