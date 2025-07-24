@@ -59,6 +59,23 @@
     <i class="fas fa-file-upload"></i>
     <input type="file" id="validDocument" accept=".jpg,.jpeg,.png,.pdf" required />
   </div>
+  <div class="input-group">
+  <input type="checkbox" id="privacyCheck" required />
+  <label for="privacyCheck">
+    I agree to the <a href="#" onclick="togglePrivacyAgreement(event)">Privacy Agreement</a>
+  </label>
+</div>
+
+<div id="privacyAgreement" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ccc; background-color: #f9f9f9;">
+  <h3>Privacy Agreement</h3>
+  <p>
+    By registering, you agree to the collection and use of your personal information for the purpose of verifying your identity and providing access to Barangay Commonwealth services. Your data will be stored securely and will not be shared with third parties without your consent, except as required by law.
+  </p>
+  <p>
+    You have the right to access, correct, or delete your personal information at any time by contacting the barangay office.
+  </p>
+</div>
+
 
   <button class="btn" id="submitSignUp" type="submit">Sign Up</button>
 </form>
