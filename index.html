@@ -8,6 +8,8 @@
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="assets/css/register.css" />
+  <!-- Keep firebaseauth module loader -->
   <script type="module" src="firebaseauth.js"></script>
 </head>
 <body>
@@ -20,297 +22,185 @@
   </header>
 
   <main class="container" role="main">
-    <!-- Register Form -->
-    <div class="form-wrapper" id="signup">
-      <h2 class="form-title" tabindex="0">Register</h2>
-      <form id="registerForm" autocomplete="on">
-        <div id="signUpMessage" class="messageDiv" style="display: none;"></div>
+    <!-- Combined Register / SignIn Container -->
+    <section class="card register-card">
+      <div class="card-side" aria-hidden="true"></div>
+      <div class="card-body">
+        <div class="auth-forms">
+          <!-- Register Form (multi-step) -->
+          <div class="form-wrapper" id="signup">
+            <h2 class="form-title" tabindex="0">Register</h2>
+            <form id="registerForm" novalidate>
+              <div id="signUpMessage" class="messageDiv" style="display: none;"></div>
 
-        <!-- Personal Information -->
-        <fieldset>
-          <legend>Personal Information</legend>
+              <div class="progress" aria-hidden="true">
+                <div class="progress-bar" style="width:33%"></div>
+              </div>
 
-          <label>First Name
-            <input type="text" id="fName" placeholder="First Name" required />
-          </label>
+              <!-- Step 1: Personal -->
+              <fieldset class="form-step" data-step="1">
+                <legend>Personal information</legend>
 
-          <label>
-            <input type="checkbox" id="dontHaveMiddleName" />
-            I don't have a middle name
-          </label>
+                <div class="grid grid-2">
+                  <div class="input-group">
+                    <input id="firstName" name="firstName" required placeholder=" " />
+                    <label for="firstName">First name</label>
+                  </div>
+                  <div class="input-group">
+                    <input id="lastName" name="lastName" required placeholder=" " />
+                    <label for="lastName">Last name</label>
+                  </div>
+                </div>
 
-          <label>Middle Name
-            <input type="text" id="middleName" placeholder="Middle Name" />
-          </label>
+                <div class="grid grid-2">
+                  <div class="input-group">
+                    <input id="middleName" name="middleName" placeholder=" " />
+                    <label for="middleName">Middle name</label>
+                    <small class="hint">Leave blank if none</small>
+                  </div>
+                  <div class="input-group">
+                    <label for="dob">Date of birth</label>
+                    <input id="dob" name="dob" type="date" />
+                  </div>
+                </div>
 
-          <label>Last Name
-            <input type="text" id="lName" placeholder="Last Name" required />
-          </label>
+                <div class="grid grid-2">
+                  <div class="input-group">
+                    <select id="sex" name="sex" required>
+                      <option value="">Sex</option>
+                      <option>Female</option>
+                      <option>Male</option>
+                      <option>Prefer not to say</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <input id="mobile" name="mobile" placeholder=" " type="tel" />
+                    <label for="mobile">Mobile number</label>
+                  </div>
+                </div>
+              </fieldset>
 
-          <label>Extension
-            <select id="extension">
-              <option value="">None</option>
-              <option value="Sr.">Sr.</option>
-              <option value="Jr.">Jr.</option>
-              <option value="III">III</option>
-              <option value="IV">IV</option>
-              <option value="Other">Other</option>
-            </select>
-            <input type="text" id="extensionOther" placeholder="If Other, specify" style="display:none; margin-top:6px;" />
-          </label>
+              <!-- Step 2: Address -->
+              <fieldset class="form-step" data-step="2" hidden>
+                <legend>Address</legend>
 
-          <label>Maiden Name (Last name before marriage)
-            <input type="text" id="maidenName" />
-          </label>
+                <div class="grid grid-2">
+                  <div class="input-group">
+                    <input id="province" name="province" placeholder=" " />
+                    <label for="province">Province</label>
+                  </div>
+                  <div class="input-group">
+                    <input id="city" name="city" placeholder=" " />
+                    <label for="city">City / Municipality</label>
+                  </div>
+                </div>
 
-          <label>Date of Birth
-            <input type="date" id="dob" />
-          </label>
+                <div class="input-group">
+                  <input id="barangayField" name="barangayField" placeholder=" " />
+                  <label for="barangayField">Barangay</label>
+                </div>
 
-          <label>Place of Birth - Region
-            <input type="text" id="placeOfBirthRegion" placeholder="Region" />
-          </label>
+                <div class="grid grid-2">
+                  <div class="input-group">
+                    <input id="street" name="street" placeholder=" " />
+                    <label for="street">Street / Village</label>
+                  </div>
+                  <div class="input-group">
+                    <input id="houseNumber" name="houseNumber" placeholder=" " />
+                    <label for="houseNumber">House number</label>
+                  </div>
+                </div>
 
-          <label>Place of Birth - City
-            <input type="text" id="placeOfBirthCity" placeholder="City" />
-          </label>
+                <div class="checkbox-row">
+                  <label><input type="checkbox" id="sameAsPermanent" checked> Same as permanent address</label>
+                </div>
+              </fieldset>
 
-          <label>Nationality
-            <input type="text" id="nationality" />
-          </label>
+              <!-- Step 3: Work & Contact -->
+              <fieldset class="form-step" data-step="3" hidden>
+                <legend>Work & contact</legend>
 
-          <label>Religion
-            <input type="text" id="religion" />
-          </label>
+                <div class="input-group">
+                  <input id="email" name="email" type="email" required placeholder=" " />
+                  <label for="email">Email address</label>
+                  <small class="hint">We will send a verification link</small>
+                </div>
 
-          <label>Sex
-            <select id="sex">
-              <option value="">Select</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Do Not Specify">Do Not Specify</option>
-            </select>
-          </label>
+                <div class="grid grid-2">
+                  <div class="input-group">
+                    <label for="isEmployed">Are you employed?</label>
+                    <select id="isEmployed" name="isEmployed">
+                      <option>No</option>
+                      <option>Yes</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <input id="nationality" name="nationality" placeholder=" " />
+                    <label for="nationality">Nationality</label>
+                  </div>
+                </div>
 
-          <label>Civil Status
-            <select id="civilStatus">
-              <option value="">Select</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Widowed">Widowed</option>
-              <option value="Separated">Separated</option>
-              <option value="Divorced">Divorced</option>
-            </select>
-          </label>
+                <div class="input-group">
+                  <i class="fas fa-file-upload"></i>
+                  <input type="file" id="validDocument" accept=".jpg,.jpeg,.png,.pdf" required />
+                </div>
 
-          <label>Personal Mobile Number
-            <input type="tel" id="personalMobile" placeholder="+63..." />
-          </label>
+                <div class="input-group">
+                  <input type="checkbox" id="privacyCheck" required />
+                  <label for="privacyCheck">I agree to the <a href="#" onclick="togglePrivacyAgreement(event)">Privacy Agreement</a></label>
+                </div>
 
-          <label>Email Address
-            <input type="email" id="rEmail" placeholder="Email" required />
-          </label>
+              </fieldset>
 
-          <label>Alternate Email Address
-            <input type="email" id="alternateEmail" placeholder="Alternate Email" />
-          </label>
-        </fieldset>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="prevBtn" hidden>Back</button>
+                <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+              </div>
+            </form>
 
-        <!-- Work Information -->
-        <fieldset>
-          <legend>Work Information (If 18 years old and above)</legend>
-
-          <label>Are you employed?
-            <select id="employed">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </label>
-
-          <div id="employmentDetailsSection" style="display:none;">
-            <label>Employment Type
-              <select id="employmentType">
-                <option value="">Select</option>
-                <option value="Part-time">Part-time</option>
-                <option value="Full-time">Full-time</option>
-                <option value="Contractual">Contractual</option>
-                <option value="Temporary">Temporary</option>
-                <option value="On-call">On-call</option>
-                <option value="Independent Contractor">Independent Contractor</option>
-              </select>
-            </label>
-
-            <label>Position / Title
-              <input type="text" id="positionTitle" />
-            </label>
-
-            <label>Company Name
-              <input type="text" id="companyName" />
-            </label>
+            <div class="alt-links">
+              <p>Already have an account?</p>
+              <button onclick="switchForm('signIn')">Sign In</button>
+            </div>
           </div>
-        </fieldset>
 
-        <!-- Present Address -->
-        <fieldset>
-          <legend>Present Address</legend>
+          <!-- Sign In Form (kept mostly as-is) -->
+          <div class="form-wrapper" id="signIn">
+            <h2 class="form-title" tabindex="0">Sign In</h2>
+            <form id="loginForm">
+              <div id="signInMessage" class="messageDiv" style="display: none;"></div>
+              <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="emailSign" placeholder="Email" required />
+              </div>
+              <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="passwordSign" placeholder="Password" required />
+                <i class="fas fa-eye toggle-password"></i>
+              </div>
+              <p class="recover"><a href="#">Recover Password</a></p>
+              <button class="btn" id="submitSignIn">Sign In</button>
+            </form>
 
-          <label>Province
-            <input type="text" id="presentProvince" />
-          </label>
-
-          <label>City
-            <input type="text" id="presentCity" />
-          </label>
-
-          <label>Barangay
-            <input type="text" id="presentBarangay" />
-          </label>
-
-          <label>Street Name, Village
-            <input type="text" id="presentStreetName" />
-          </label>
-
-          <label>House Number
-            <input type="text" id="presentHouseNumber" />
-          </label>
-
-          <label>Is this your primary address?
-            <input type="checkbox" id="presentIsPrimary" checked />
-          </label>
-
-          <label>Same as permanent address?
-            <input type="checkbox" id="sameAsPermanent" />
-          </label>
-        </fieldset>
-
-        <!-- Permanent Address -->
-        <fieldset>
-          <legend>Permanent Address</legend>
-
-          <label>Province
-            <input type="text" id="permanentProvince" />
-          </label>
-
-          <label>City
-            <input type="text" id="permanentCity" />
-          </label>
-
-          <label>Barangay
-            <input type="text" id="permanentBarangay" />
-          </label>
-
-          <label>Street Name, Village
-            <input type="text" id="permanentStreetName" />
-          </label>
-
-          <label>House Number
-            <input type="text" id="permanentHouseNumber" />
-          </label>
-
-          <label>Is this your primary address?
-            <select id="permanentIsPrimary">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </label>
-        </fieldset>
-
-        <!-- Sectoral Info -->
-        <fieldset>
-          <legend>Sectoral Information</legend>
-          <label><input type="checkbox" id="pwd" /> PWD</label>
-          <label><input type="checkbox" id="soloParent" /> Solo Parent</label>
-          <label><input type="checkbox" id="senior" /> Senior</label>
-          <label><input type="checkbox" id="student" /> Student</label>
-        </fieldset>
-
-        <!-- Health Record -->
-        <fieldset>
-          <legend>Health Record</legend>
-          <label>Blood Type
-            <input type="text" id="bloodType" />
-          </label>
-
-          <label>Height (cm)
-            <input type="number" id="height" min="0" />
-          </label>
-
-          <label>Weight (kg)
-            <input type="number" id="weight" min="0" />
-          </label>
-
-          <label>Hair Color
-            <input type="text" id="hairColor" />
-          </label>
-
-          <label>Eye Color
-            <input type="text" id="eyeColor" />
-          </label>
-
-          <label>Wearing glasses?
-            <input type="checkbox" id="wearingGlasses" />
-          </label>
-
-          <label>Wearing dentures?
-            <input type="checkbox" id="wearingDentures" />
-          </label>
-        </fieldset>
-
-        <!-- Submitted Document -->
-        <fieldset>
-          <legend>Submitted Documents</legend>
-          <label>Valid ID or Birth Certificate
-            <input type="file" id="validDocument" accept=".jpg,.jpeg,.png,.pdf" required />
-          </label>
-        </fieldset>
-
-        <fieldset>
-          <label>
-            <input type="checkbox" id="privacyCheck" required />
-            I agree to the <a href="#" onclick="togglePrivacyAgreement(event)">Privacy Agreement</a>
-          </label>
-        </fieldset>
-
-        <button class="btn" id="submitSignUp" type="submit">Sign Up</button>
-      </form>
-
-      <div class="alt-links">
-        <p>Already have an account?</p>
-        <button onclick="switchForm('signIn')">Sign In</button>
-      </div>
-    </div>
-
-    <!-- Login Form -->
-    <div class="form-wrapper active" id="signIn">
-      <h2 class="form-title" tabindex="0">Sign In</h2>
-      <form id="loginForm">
-        <div id="signInMessage" class="messageDiv" style="display: none;"></div>
-        <div class="input-group">
-          <i class="fas fa-envelope"></i>
-          <input type="email" id="email" placeholder="Email" required />
+            <div class="alt-links">
+              <p>Don't have an account?</p>
+              <button onclick="switchForm('signup')">Sign Up</button>
+            </div>
+          </div>
         </div>
-        <div class="input-group">
-          <i class="fas fa-lock"></i>
-          <input type="password" id="password" placeholder="Password" required />
-          <i class="fas fa-eye toggle-password"></i>
-        </div>
-        <p class="recover"><a href="#">Recover Password</a></p>
-        <button class="btn" id="submitSignIn">Sign In</button>
-      </form>
-
-      <div class="alt-links">
-        <p>Don't have an account?</p>
-        <button onclick="switchForm('signup')">Sign Up</button>
       </div>
-    </div>
+    </section>
   </main>
+
+  <script src="assets/js/register.js" defer></script>
 
   <script>
     function switchForm(formId) {
       document.getElementById('signIn').classList.remove('active');
       document.getElementById('signup').classList.remove('active');
       document.getElementById(formId).classList.add('active');
-      document.getElementById(formId).querySelector('input, select').focus();
+      const first = document.getElementById(formId).querySelector('input, select');
+      if(first) first.focus();
     }
 
     function toggleTheme() {
@@ -320,66 +210,19 @@
       icon.classList.toggle('fa-sun');
     }
 
-    // Password toggle logic
-    document.querySelectorAll('.toggle-password').forEach(icon => {
-      icon.addEventListener('click', () => {
+    function togglePrivacyAgreement(e){ e.preventDefault(); const el = document.getElementById('privacyAgreement'); if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none'; }
+
+    // Password toggle logic (delegated)
+    document.addEventListener('click', (ev)=>{
+      if(ev.target.classList && ev.target.classList.contains('toggle-password')){
+        const icon = ev.target;
         const input = icon.previousElementSibling;
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.classList.remove('fa-eye');
-          icon.classList.add('fa-eye-slash');
-        } else {
-          input.type = 'password';
-          icon.classList.remove('fa-eye-slash');
-          icon.classList.add('fa-eye');
-        }
-      });
-    });
-
-    // show/hide extension Other input
-    const extensionEl = document.getElementById('extension');
-    const extensionOther = document.getElementById('extensionOther');
-    if (extensionEl) {
-      extensionEl.addEventListener('change', () => {
-        extensionOther.style.display = extensionEl.value === 'Other' ? 'block' : 'none';
-      });
-    }
-
-    // employment details toggle
-    const employedEl = document.getElementById('employed');
-    const employmentSection = document.getElementById('employmentDetailsSection');
-    if (employedEl) {
-      employedEl.addEventListener('change', () => {
-        employmentSection.style.display = employedEl.value === 'Yes' ? 'block' : 'none';
-      });
-    }
-
-    // sameAsPermanent copy
-    const sameAsPermanent = document.getElementById('sameAsPermanent');
-    sameAsPermanent?.addEventListener('change', () => {
-      if (sameAsPermanent.checked) {
-        document.getElementById('permanentProvince').value = document.getElementById('presentProvince').value;
-        document.getElementById('permanentCity').value = document.getElementById('presentCity').value;
-        document.getElementById('permanentBarangay').value = document.getElementById('presentBarangay').value;
-        document.getElementById('permanentStreetName').value = document.getElementById('presentStreetName').value;
-        document.getElementById('permanentHouseNumber').value = document.getElementById('presentHouseNumber').value;
+        if(input && input.type === 'password'){
+          input.type = 'text'; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
+        } else if(input){ input.type = 'password'; icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
       }
     });
-
-    // dontHaveMiddleName logic
-    const dontHaveMiddleName = document.getElementById('dontHaveMiddleName');
-    dontHaveMiddleName?.addEventListener('change', () => {
-      const mn = document.getElementById('middleName');
-      if (dontHaveMiddleName.checked) {
-        mn.value = '';
-        mn.disabled = true;
-      } else {
-        mn.disabled = false;
-      }
-    });
-
   </script>
-
 </body>
 </html>
 
