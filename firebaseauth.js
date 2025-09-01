@@ -19,7 +19,7 @@ import {
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-storage.js";
 
-// Firebase config
+// Firebase config (keep your existing keys)
 const firebaseConfig = {
   apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
   authDomain: "npwebapp-c9ee3.firebaseapp.com",
@@ -36,7 +36,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Debug function to log database operations
+// Debug function
 function debugLog(operation, data) {
   console.log(`[DEBUG] ${operation}:`, data);
 }
@@ -50,20 +50,24 @@ function showMessage(message, divId) {
     messageDiv.style.opacity = 1;
     setTimeout(() => {
       messageDiv.style.opacity = 0;
+      // hide after fade
+      setTimeout(() => { messageDiv.style.display = "none"; }, 400);
     }, 4000);
   } else {
-    // fallback alert so user sees errors when message container is missing
     alert(message);
   }
 }
 
-// Helper getters that safely handle missing DOM elements
+// small helper to wait
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Helpers
 function getValue(id, defaultValue = "") {
   const el = document.getElementById(id);
   if (!el) return defaultValue;
-  // check for checkbox
   if (el.type === "checkbox") return el.checked;
-  // selects and inputs
   return (el.value ?? defaultValue).toString().trim();
 }
 function getChecked(id) {
@@ -75,31 +79,35 @@ function getIntValue(id, defaultValue = 0) {
   const n = parseInt(val, 10);
   return Number.isFinite(n) ? n : defaultValue;
 }
+function calculateAge(dobValue) {
+  if (!dobValue) return null;
+  const dob = new Date(dobValue);
+  if (isNaN(dob)) return null;
+  const diff = Date.now() - dob.getTime();
+  const ageDt = new Date(diff);
+  return Math.abs(ageDt.getUTCFullYear() - 1970);
+}
 
-// Collect beneficiaries (keeps original robust behavior)
+// Collect beneficiaries (keeps original behavior)
 function getBeneficiaries() {
   const container = document.getElementById("beneficiaries");
   if (!container) return [];
-
   const groups = container.querySelectorAll(".form-group");
   const beneficiaries = [];
-
   groups.forEach(group => {
     const name = group.querySelector('[name="beneficiaryName"]')?.value || "";
     const relationship = group.querySelector('[name="beneficiaryRelationship"]')?.value || "";
     const age = group.querySelector('[name="beneficiaryAge"]')?.value || "";
     const pwd = group.querySelector('[name="beneficiaryPWD"]')?.checked || false;
     const senior = group.querySelector('[name="beneficiarySenior"]')?.checked || false;
-
     if (name && relationship && age) {
       beneficiaries.push({ name, relationship, age: parseInt(age), pwd, senior });
     }
   });
-
   return beneficiaries;
 }
 
-// Upload file to Firebase Storage
+// Upload file
 async function uploadDocument(userId, file) {
   try {
     debugLog("Starting file upload", { userId, fileName: file.name });
@@ -115,12 +123,11 @@ async function uploadDocument(userId, file) {
   }
 }
 
-// Google Sign-In (unchanged but kept safe)
+// Google Sign-In (keeps previous behavior)
 document.querySelectorAll(".fa-google").forEach((btn) => {
   btn.addEventListener("click", async () => {
     const provider = new GoogleAuthProvider();
     debugLog("Google sign-in attempt");
-
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
@@ -132,7 +139,6 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
         const nameParts = (user.displayName || "").split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
-
         const memberData = {
           email: user.email,
           firstName,
@@ -149,50 +155,22 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
           personalMobile: "",
           alternateEmail: "",
           employed: false,
-          employmentDetails: {
-            employmentType: "",
-            positionTitle: "",
-            companyName: ""
-          },
-          presentAddress: {
-            province: "",
-            city: "",
-            barangay: "",
-            streetName: "",
-            houseNumber: "",
-            isPrimary: true
-          },
-          permanentAddress: {
-            province: "",
-            city: "",
-            barangay: "",
-            streetName: "",
-            houseNumber: "",
-            isPrimary: false
-          },
-          sectoralInfo: {
-            pwd: false,
-            soloParent: false,
-            senior: false,
-            student: false
-          },
-          healthRecord: {
-            bloodType: "",
-            height: 0,
-            weight: 0,
-            hairColor: "",
-            eyeColor: "",
-            wearingGlasses: false,
-            wearingDentures: false
-          },
+          employmentDetails: { employmentType: "", positionTitle: "", companyName: "" },
+          presentAddress: { province: "", city: "", barangay: "", streetName: "", houseNumber: "", isPrimary: true },
+          permanentAddress: { province: "", city: "", barangay: "", streetName: "", houseNumber: "", isPrimary: false },
+          sectoralInfo: { pwd: false, soloParent: false, senior: false, student: false },
+          healthRecord: { bloodType: "", height: 0, weight: 0, hairColor: "", eyeColor: "", wearingGlasses: false, wearingDentures: false },
           createdAt: new Date().toISOString(),
           role: "member"
         };
-
         await setDoc(doc(db, "users", user.uid), memberData);
         await setDoc(doc(db, "members", user.uid), memberData);
         debugLog("Google user data saved successfully");
       }
+
+      // Show success message and redirect
+      showMessage("Registration successful! Redirecting...", "signInMessage");
+      await delay(1400);
       window.location.href = "user-dashboard.html";
     } catch (error) {
       debugLog("Google Sign-In Error", error);
@@ -202,19 +180,27 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
   });
 });
 
-// Sign Up - made robust against missing fields
+// Sign Up
 document.getElementById("submitSignUp")?.addEventListener("click", async (event) => {
   event.preventDefault();
 
   try {
     const email = getValue("rEmail");
     const password = document.getElementById("rPassword")?.value ?? "";
+    // Personal fields
     const firstName = getValue("fName");
+    const dontHaveMiddle = getChecked("dontHaveMiddleName");
+    const middleName = dontHaveMiddle ? "" : getValue("middleName");
     const lastName = getValue("lName");
-    const middleName = getValue("middleName");
-    const extension = getValue("extension");
+    let extension = getValue("extension");
+    if (extension === "Other") {
+      const other = getValue("extensionOther");
+      extension = other || "Other";
+    }
     const maidenName = getValue("maidenName");
     const dob = getValue("dob");
+    const age = calculateAge(dob);
+    const isAdult = age !== null ? age >= 18 : null;
     const placeOfBirthRegion = getValue("placeOfBirthRegion");
     const placeOfBirthCity = getValue("placeOfBirthCity");
     const nationality = getValue("nationality");
@@ -223,10 +209,16 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
     const civilStatus = getValue("civilStatus");
     const personalMobile = getValue("personalMobile");
     const alternateEmail = getValue("alternateEmail");
-    const employed = getValue("employed") === "Yes" || getChecked("employed");
-    const employmentType = getValue("employmentType");
-    const positionTitle = getValue("positionTitle");
-    const companyName = getValue("companyName");
+
+    // Work info
+    let employed = getValue("employed") === "Yes" || getValue("employed") === true;
+    // If age known and < 18, force employed = false
+    if (isAdult === false) {
+      employed = false;
+    }
+    const employmentType = employed ? getValue("employmentType") : "";
+    const positionTitle = employed ? getValue("positionTitle") : "";
+    const companyName = employed ? getValue("companyName") : "";
 
     const presentAddress = {
       province: getValue("presentProvince"),
@@ -242,7 +234,7 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
       barangay: getValue("permanentBarangay"),
       streetName: getValue("permanentStreetName"),
       houseNumber: getValue("permanentHouseNumber"),
-      isPrimary: getChecked("permanentIsPrimary")
+      isPrimary: getValue("permanentIsPrimary") === "Yes" || getChecked("permanentIsPrimary")
     };
 
     const sectoralInfo = {
@@ -270,6 +262,7 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
       extension,
       maidenName,
       dob,
+      age,
       placeOfBirth: { region: placeOfBirthRegion, city: placeOfBirthCity },
       nationality,
       religion,
@@ -288,62 +281,48 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
       role: "member"
     };
 
-    // If there's a file input and a file selected, upload it and include URL
+    // file upload & account creation
     const fileInput = document.getElementById("validDocument");
+    // Create user first to get UID (and ensure auth account created) - we do this before upload to organize storage path
+    const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
+    const user = signUpResult.user;
+
     if (fileInput && fileInput.files && fileInput.files.length > 0) {
-      // create user first to have uid, but we can create user then upload file
-      const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
-      const user = signUpResult.user;
       try {
         const downloadURL = await uploadDocument(user.uid, fileInput.files[0]);
         memberData.validDocumentURL = downloadURL;
       } catch (uploadErr) {
-        // log upload error but continue - we still save account and member data
         debugLog("Document upload failed (continuing)", uploadErr);
       }
-
-      await setDoc(doc(db, "users", user.uid), memberData);
-      await setDoc(doc(db, "members", user.uid), memberData);
-
-      alert("Account created successfully!");
-      window.location.href = "user-dashboard.html";
-      return;
     }
-
-    // If no file present, create user and save data (but registration validation likely requires file)
-    const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
-    const user = signUpResult.user;
 
     await setDoc(doc(db, "users", user.uid), memberData);
     await setDoc(doc(db, "members", user.uid), memberData);
 
-    alert("Account created successfully!");
+    // show success message and redirect so the user can see it
+    showMessage("Registration successful! Redirecting...", "signUpMessage");
+    await delay(1400);
     window.location.href = "user-dashboard.html";
   } catch (error) {
     console.error("Sign-Up Error:", error);
-    // If Firebase errors, show friendly message
     if (error?.code) {
-      alert("Failed to create account: " + (error.message || error.code));
+      showMessage("Failed to create account: " + (error.message || error.code), "signUpMessage");
     } else {
-      alert("Failed to create account: " + (error?.message || error));
+      showMessage("Failed to create account: " + (error?.message || error), "signUpMessage");
     }
   }
 });
 
-// Sign In (kept safe, unchanged except small guards)
+// Sign In (no functional change)
 document.getElementById("submitSignIn")?.addEventListener("click", async (event) => {
   event.preventDefault();
-
   const email = document.getElementById("email")?.value?.trim() || "";
   const password = document.getElementById("password")?.value || "";
-
   debugLog("Sign in attempt", { email });
-
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     debugLog("User signed in", { uid: user.uid, email: user.email });
-
     const userDoc = await getDoc(doc(db, "users", user.uid));
     debugLog("User document fetch result", { exists: userDoc.exists() });
 
@@ -352,17 +331,15 @@ document.getElementById("submitSignIn")?.addEventListener("click", async (event)
       const userData = userDoc.data();
       role = userData.role || "member";
       debugLog("User role", { role });
-    } else {
-      debugLog("User document not found in database, defaulting to member dashboard", { uid: user.uid });
     }
 
+    showMessage("Login Successful", "signInMessage");
+    await delay(900);
     if (role === "admin") {
       window.location.href = "admin-dashboard.html";
     } else {
       window.location.href = "user-dashboard.html";
     }
-
-    showMessage("Login Successful", "signInMessage");
   } catch (error) {
     debugLog("Sign in error", error);
     console.error("Sign in error:", error);
@@ -376,7 +353,7 @@ document.getElementById("submitSignIn")?.addEventListener("click", async (event)
   }
 });
 
-// Add a function to test database connectivity
+// Test DB connectivity helper
 window.testDatabaseConnection = async () => {
   try {
     debugLog("Testing database connection");
@@ -393,7 +370,6 @@ window.testDatabaseConnection = async () => {
   }
 };
 
-// Log Firebase initialization
 debugLog("Firebase initialized", {
   projectId: firebaseConfig.projectId,
   authDomain: firebaseConfig.authDomain
