@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Barangay Commonwealth Portal</title>
+    <link rel="stylesheet" href="assets/css/register.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="header-title">Barangay Commonwealth Portal</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="registration-container">
+            <div class="card">
+                <div class="card-side" aria-hidden="true"></div>
+                <div class="card-content">
+                    <div class="form-header">
+                        <h2>Create Your Account</h2>
+                        <p>Join the Barangay Commonwealth community</p>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-steps">
+                            <span class="step active" data-step="1">Personal</span>
+                            <span class="step" data-step="2">Address</span>
+                            <span class="step" data-step="3">Contact</span>
+                        </div>
+                    </div>
+
+                    <form id="registrationForm" class="registration-form">
+                        <!-- Step 1: Personal Information -->
+                        <fieldset class="form-step active" id="step1">
+                            <legend>Personal Information</legend>
+                            
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <input type="text" id="firstName" name="firstName" required>
+                                    <label for="firstName">First Name</label>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="lastName" name="lastName" required>
+                                    <label for="lastName">Last Name</label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="text" id="middleName" name="middleName">
+                                <label for="middleName">Middle Name (Optional)</label>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <input type="date" id="birthDate" name="birthDate" required>
+                                    <label for="birthDate">Date of Birth</label>
+                                </div>
+                                <div class="input-group">
+                                    <select id="gender" name="gender" required>
+                                        <option value=""></option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Prefer not to say</option>
+                                    </select>
+                                    <label for="gender">Gender</label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="text" id="nationality" name="nationality" required>
+                                <label for="nationality">Nationality</label>
+                            </div>
+                        </fieldset>
+
+                        <!-- Step 2: Address Information -->
+                        <fieldset class="form-step" id="step2">
+                            <legend>Address Information</legend>
+                            
+                            <div class="input-group">
+                                <input type="text" id="street" name="street" required>
+                                <label for="street">Street Address</label>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <input type="text" id="barangay" name="barangay" required>
+                                    <label for="barangay">Barangay</label>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="city" name="city" required>
+                                    <label for="city">City/Municipality</label>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <input type="text" id="province" name="province" required>
+                                    <label for="province">Province</label>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="zipCode" name="zipCode" required>
+                                    <label for="zipCode">ZIP Code</label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <select id="region" name="region" required>
+                                    <option value=""></option>
+                                    <option value="ncr">National Capital Region</option>
+                                    <option value="region1">Region I - Ilocos Region</option>
+                                    <option value="region2">Region II - Cagayan Valley</option>
+                                    <option value="region3">Region III - Central Luzon</option>
+                                    <option value="region4a">Region IV-A - CALABARZON</option>
+                                    <option value="region4b">Region IV-B - MIMAROPA</option>
+                                    <option value="region5">Region V - Bicol Region</option>
+                                    <option value="region6">Region VI - Western Visayas</option>
+                                    <option value="region7">Region VII - Central Visayas</option>
+                                    <option value="region8">Region VIII - Eastern Visayas</option>
+                                    <option value="region9">Region IX - Zamboanga Peninsula</option>
+                                    <option value="region10">Region X - Northern Mindanao</option>
+                                    <option value="region11">Region XI - Davao Region</option>
+                                    <option value="region12">Region XII - SOCCSKSARGEN</option>
+                                    <option value="region13">Region XIII - Caraga</option>
+                                    <option value="barmm">BARMM - Bangsamoro</option>
+                                    <option value="car">CAR - Cordillera Administrative Region</option>
+                                </select>
+                                <label for="region">Region</label>
+                            </div>
+                        </fieldset>
+
+                        <!-- Step 3: Work & Contact Information -->
+                        <fieldset class="form-step" id="step3">
+                            <legend>Work &amp; Contact Information</legend>
+                            
+                            <div class="input-group">
+                                <input type="email" id="email" name="email" required>
+                                <label for="email">Email Address</label>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="tel" id="phone" name="phone" required>
+                                <label for="phone">Phone Number</label>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="text" id="occupation" name="occupation">
+                                <label for="occupation">Occupation (Optional)</label>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="text" id="employer" name="employer">
+                                <label for="employer">Employer/Company (Optional)</label>
+                            </div>
+
+                            <div class="input-group">
+                                <select id="civilStatus" name="civilStatus" required>
+                                    <option value=""></option>
+                                    <option value="single">Single</option>
+                                    <option value="married">Married</option>
+                                    <option value="divorced">Divorced</option>
+                                    <option value="widowed">Widowed</option>
+                                    <option value="separated">Separated</option>
+                                </select>
+                                <label for="civilStatus">Civil Status</label>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="terms" name="terms" required>
+                                <label for="terms">I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a></label>
+                            </div>
+
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="newsletter" name="newsletter">
+                                <label for="newsletter">I would like to receive updates and notifications from Barangay Commonwealth</label>
+                            </div>
+                        </fieldset>
+
+                        <!-- Navigation Buttons -->
+                        <div class="form-navigation">
+                            <button type="button" id="prevBtn" class="btn btn-secondary" style="display: none;">
+                                <span>← Previous</span>
+                            </button>
+                            <button type="button" id="nextBtn" class="btn btn-primary">
+                                <span>Next →</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Barangay Commonwealth Portal. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/register.js" defer></script>
+</body>
+</html>
