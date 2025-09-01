@@ -51,10 +51,32 @@ function showMessage(message, divId) {
     setTimeout(() => {
       messageDiv.style.opacity = 0;
     }, 4000);
+  } else {
+    // fallback alert so user sees errors when message container is missing
+    alert(message);
   }
 }
 
-// Collect beneficiaries
+// Helper getters that safely handle missing DOM elements
+function getValue(id, defaultValue = "") {
+  const el = document.getElementById(id);
+  if (!el) return defaultValue;
+  // check for checkbox
+  if (el.type === "checkbox") return el.checked;
+  // selects and inputs
+  return (el.value ?? defaultValue).toString().trim();
+}
+function getChecked(id) {
+  const el = document.getElementById(id);
+  return el ? !!el.checked : false;
+}
+function getIntValue(id, defaultValue = 0) {
+  const val = document.getElementById(id)?.value;
+  const n = parseInt(val, 10);
+  return Number.isFinite(n) ? n : defaultValue;
+}
+
+// Collect beneficiaries (keeps original robust behavior)
 function getBeneficiaries() {
   const container = document.getElementById("beneficiaries");
   if (!container) return [];
@@ -93,7 +115,7 @@ async function uploadDocument(userId, file) {
   }
 }
 
-// Google Sign-In
+// Google Sign-In (unchanged but kept safe)
 document.querySelectorAll(".fa-google").forEach((btn) => {
   btn.addEventListener("click", async () => {
     const provider = new GoogleAuthProvider();
@@ -107,10 +129,10 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
         debugLog("New Google user, creating database records");
-        const firstName = user.displayName?.split(" ")[0] || "";
-        const lastName = user.displayName?.split(" ")[1] || "";
-        
-        // Prepare member data with new fields
+        const nameParts = (user.displayName || "").split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
         const memberData = {
           email: user.email,
           firstName,
@@ -167,7 +189,6 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
           role: "member"
         };
 
-        // Save to Firebase
         await setDoc(doc(db, "users", user.uid), memberData);
         await setDoc(doc(db, "members", user.uid), memberData);
         debugLog("Google user data saved successfully");
@@ -176,93 +197,120 @@ document.querySelectorAll(".fa-google").forEach((btn) => {
     } catch (error) {
       debugLog("Google Sign-In Error", error);
       console.error("Google Sign-In Error:", error);
-      alert("Google Sign-In failed: " + error.message);
+      alert("Google Sign-In failed: " + (error.message || error));
     }
   });
 });
 
-// Sign Up
-document.getElementById("submitSignUp").addEventListener("click", async (event) => {
+// Sign Up - made robust against missing fields
+document.getElementById("submitSignUp")?.addEventListener("click", async (event) => {
   event.preventDefault();
 
-  const email = document.getElementById("rEmail").value.trim();
-  const password = document.getElementById("rPassword").value;
-  const firstName = document.getElementById("fName").value.trim();
-  const lastName = document.getElementById("lName").value.trim();
-  const middleName = document.getElementById("middleName").value.trim();
-  const extension = document.getElementById("extension").value;
-  const maidenName = document.getElementById("maidenName").value.trim();
-  const dob = document.getElementById("dob").value;
-  const placeOfBirthRegion = document.getElementById("placeOfBirthRegion").value;
-  const placeOfBirthCity = document.getElementById("placeOfBirthCity").value;
-  const nationality = document.getElementById("nationality").value.trim();
-  const religion = document.getElementById("religion").value.trim();
-  const sex = document.getElementById("sex").value;
-  const civilStatus = document.getElementById("civilStatus").value.trim();
-  const personalMobile = document.getElementById("personalMobile").value.trim();
-  const alternateEmail = document.getElementById("alternateEmail").value.trim();
-  const employed = document.getElementById("employed").value === "Yes";
-  const employmentType = document.getElementById("employmentType").value;
-  const positionTitle = document.getElementById("positionTitle").value.trim();
-  const companyName = document.getElementById("companyName").value.trim();
-  const presentAddress = {
-    province: document.getElementById("presentProvince").value.trim(),
-    city: document.getElementById("presentCity").value.trim(),
-    barangay: document.getElementById("presentBarangay").value.trim(),
-    streetName: document.getElementById("presentStreetName").value.trim(),
-    houseNumber: document.getElementById("presentHouseNumber").value.trim(),
-    isPrimary: document.getElementById("presentIsPrimary").checked
-  };
-  const permanentAddress = {
-    province: document.getElementById("permanentProvince").value.trim(),
-    city: document.getElementById("permanentCity").value.trim(),
-    barangay: document.getElementById("permanentBarangay").value.trim(),
-    streetName: document.getElementById("permanentStreetName").value.trim(),
-    houseNumber: document.getElementById("permanentHouseNumber").value.trim(),
-    isPrimary: document.getElementById("permanentIsPrimary").checked
-  };
-  const sectoralInfo = {
-    pwd: document.getElementById("pwd").checked,
-    soloParent: document.getElementById("soloParent").checked,
-    senior: document.getElementById("senior").checked,
-    student: document.getElementById("student").checked
-  };
-  const healthRecord = {
-    bloodType: document.getElementById("bloodType").value.trim(),
-    height: parseInt(document.getElementById("height").value, 10),
-    weight: parseInt(document.getElementById("weight").value, 10),
-    hairColor: document.getElementById("hairColor").value.trim(),
-    eyeColor: document.getElementById("eyeColor").value.trim(),
-    wearingGlasses: document.getElementById("wearingGlasses").checked,
-    wearingDentures: document.getElementById("wearingDentures").checked
-  };
-
-  const memberData = {
-    email,
-    firstName,
-    lastName,
-    middleName,
-    extension,
-    maidenName,
-    dob,
-    placeOfBirth: { region: placeOfBirthRegion, city: placeOfBirthCity },
-    nationality,
-    religion,
-    sex,
-    civilStatus,
-    personalMobile,
-    alternateEmail,
-    employed,
-    employmentDetails: { employmentType, positionTitle, companyName },
-    presentAddress,
-    permanentAddress,
-    sectoralInfo,
-    healthRecord,
-    createdAt: new Date().toISOString(),
-    role: "member"
-  };
-
   try {
+    const email = getValue("rEmail");
+    const password = document.getElementById("rPassword")?.value ?? "";
+    const firstName = getValue("fName");
+    const lastName = getValue("lName");
+    const middleName = getValue("middleName");
+    const extension = getValue("extension");
+    const maidenName = getValue("maidenName");
+    const dob = getValue("dob");
+    const placeOfBirthRegion = getValue("placeOfBirthRegion");
+    const placeOfBirthCity = getValue("placeOfBirthCity");
+    const nationality = getValue("nationality");
+    const religion = getValue("religion");
+    const sex = getValue("sex");
+    const civilStatus = getValue("civilStatus");
+    const personalMobile = getValue("personalMobile");
+    const alternateEmail = getValue("alternateEmail");
+    const employed = getValue("employed") === "Yes" || getChecked("employed");
+    const employmentType = getValue("employmentType");
+    const positionTitle = getValue("positionTitle");
+    const companyName = getValue("companyName");
+
+    const presentAddress = {
+      province: getValue("presentProvince"),
+      city: getValue("presentCity"),
+      barangay: getValue("presentBarangay"),
+      streetName: getValue("presentStreetName"),
+      houseNumber: getValue("presentHouseNumber"),
+      isPrimary: getChecked("presentIsPrimary")
+    };
+    const permanentAddress = {
+      province: getValue("permanentProvince"),
+      city: getValue("permanentCity"),
+      barangay: getValue("permanentBarangay"),
+      streetName: getValue("permanentStreetName"),
+      houseNumber: getValue("permanentHouseNumber"),
+      isPrimary: getChecked("permanentIsPrimary")
+    };
+
+    const sectoralInfo = {
+      pwd: getChecked("pwd"),
+      soloParent: getChecked("soloParent"),
+      senior: getChecked("senior"),
+      student: getChecked("student")
+    };
+
+    const healthRecord = {
+      bloodType: getValue("bloodType"),
+      height: getIntValue("height", 0),
+      weight: getIntValue("weight", 0),
+      hairColor: getValue("hairColor"),
+      eyeColor: getValue("eyeColor"),
+      wearingGlasses: getChecked("wearingGlasses"),
+      wearingDentures: getChecked("wearingDentures")
+    };
+
+    const memberData = {
+      email,
+      firstName,
+      lastName,
+      middleName,
+      extension,
+      maidenName,
+      dob,
+      placeOfBirth: { region: placeOfBirthRegion, city: placeOfBirthCity },
+      nationality,
+      religion,
+      sex,
+      civilStatus,
+      personalMobile,
+      alternateEmail,
+      employed,
+      employmentDetails: { employmentType, positionTitle, companyName },
+      presentAddress,
+      permanentAddress,
+      sectoralInfo,
+      healthRecord,
+      beneficiaries: getBeneficiaries(),
+      createdAt: new Date().toISOString(),
+      role: "member"
+    };
+
+    // If there's a file input and a file selected, upload it and include URL
+    const fileInput = document.getElementById("validDocument");
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      // create user first to have uid, but we can create user then upload file
+      const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
+      const user = signUpResult.user;
+      try {
+        const downloadURL = await uploadDocument(user.uid, fileInput.files[0]);
+        memberData.validDocumentURL = downloadURL;
+      } catch (uploadErr) {
+        // log upload error but continue - we still save account and member data
+        debugLog("Document upload failed (continuing)", uploadErr);
+      }
+
+      await setDoc(doc(db, "users", user.uid), memberData);
+      await setDoc(doc(db, "members", user.uid), memberData);
+
+      alert("Account created successfully!");
+      window.location.href = "user-dashboard.html";
+      return;
+    }
+
+    // If no file present, create user and save data (but registration validation likely requires file)
     const signUpResult = await createUserWithEmailAndPassword(auth, email, password);
     const user = signUpResult.user;
 
@@ -273,16 +321,21 @@ document.getElementById("submitSignUp").addEventListener("click", async (event) 
     window.location.href = "user-dashboard.html";
   } catch (error) {
     console.error("Sign-Up Error:", error);
-    alert("Failed to create account: " + error.message);
+    // If Firebase errors, show friendly message
+    if (error?.code) {
+      alert("Failed to create account: " + (error.message || error.code));
+    } else {
+      alert("Failed to create account: " + (error?.message || error));
+    }
   }
 });
 
-// Sign In
-document.getElementById("submitSignIn").addEventListener("click", async (event) => {
+// Sign In (kept safe, unchanged except small guards)
+document.getElementById("submitSignIn")?.addEventListener("click", async (event) => {
   event.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const email = document.getElementById("email")?.value?.trim() || "";
+  const password = document.getElementById("password")?.value || "";
 
   debugLog("Sign in attempt", { email });
 
@@ -318,7 +371,7 @@ document.getElementById("submitSignIn").addEventListener("click", async (event) 
     } else if (error.code === "auth/invalid-email") {
       showMessage("Invalid email address", "signInMessage");
     } else {
-      showMessage("Error: " + error.message, "signInMessage");
+      showMessage("Error: " + (error.message || error), "signInMessage");
     }
   }
 });
@@ -328,7 +381,7 @@ window.testDatabaseConnection = async () => {
   try {
     debugLog("Testing database connection");
     const testDocRef = doc(db, "test", "connection");
-    await setDoc(testDocRef, { 
+    await setDoc(testDocRef, {
       timestamp: new Date().toISOString(),
       test: "Database connection successful"
     });
@@ -341,7 +394,7 @@ window.testDatabaseConnection = async () => {
 };
 
 // Log Firebase initialization
-debugLog("Firebase initialized", { 
+debugLog("Firebase initialized", {
   projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain 
+  authDomain: firebaseConfig.authDomain
 });
