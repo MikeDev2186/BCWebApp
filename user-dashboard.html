@@ -13,6 +13,10 @@
   <h1>Member Dashboard</h1>
 </header>
 
+<!-- Debug message placeholders -->
+<div id="signUpMessage" style="display: none; background: #f0f8ff; border: 1px solid #0066cc; padding: 10px; margin: 10px; border-radius: 4px;"></div>
+<div id="signInMessage" style="display: none; background: #f0f8ff; border: 1px solid #0066cc; padding: 10px; margin: 10px; border-radius: 4px;"></div>
+
 
 <div class="main-content">
   <div class="side-panel" role="navigation" aria-label="left panel navigation">
@@ -103,24 +107,11 @@
   </div>
 </div>
 
+<script type="module" src="firebaseauth.js"></script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
   import { getFirestore, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCMZKXMBzr_m7RcI-_kXocACYxBAvyOCBo",
-    authDomain: "npwebapp-c9ee3.firebaseapp.com",
-    projectId: "npwebapp-c9ee3",
-    storageBucket: "npwebapp-c9ee3.appspot.com",
-    messagingSenderId: "149339991351",
-    appId: "1:149339991351:web:72ca48b9c31ad2054abeb2",
-    measurementId: "G-X761ZGHTSH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  import { auth, db } from "./firebaseauth.js";
 
   const emailInput = document.getElementById("email");
   const beneficiariesContainer = document.getElementById("beneficiariesContainer");

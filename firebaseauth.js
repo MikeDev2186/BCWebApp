@@ -1,3 +1,4 @@
+console.log("Firebase auth module loaded:", new Date().toISOString());
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
 import {
   getAuth,
@@ -374,3 +375,6 @@ debugLog("Firebase initialized", {
   projectId: firebaseConfig.projectId,
   authDomain: firebaseConfig.authDomain
 });
+
+// Export Firebase objects and functions for use in other modules
+export { auth, db, showMessage, debugLog };
