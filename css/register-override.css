@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+:root{
+  --primary: #0b8a72;
+  --muted: #6b7280;
+  --card-bg: rgba(255,255,255,0.96);
+  --border: #e6e9ee;
+  --radius: 10px;
+  --shadow: 0 8px 24px rgba(11,138,114,0.10);
+}
+
+body { font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+
+/* container that surrounds the whole form (adjust selector to your page) */
+#register-container, .register-wrapper, form[name="register"] {
+  max-width: 920px;
+  margin: 22px auto;
+  padding: 22px;
+  background: var(--card-bg) !important;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,0,0,0.06);
+  font-size: 14px;
+}
+
+/* make table full width and remove very visible borders */
+#register-container table, .register-wrapper table, form table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none;
+  margin: 0;
+}
+
+/* tidy up labels inside cells */
+#register-container td, .register-wrapper td, form td {
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+#register-container legend, .register-wrapper legend {
+  color: var(--primary);
+  font-weight: 600;
+  padding: 0 6px;
+}
+
+/* Inputs */
+#register-container input[type="text"],
+#register-container input[type="email"],
+#register-container input[type="date"],
+#register-container select,
+.register-wrapper input[type="text"],
+.register-wrapper select,
+form[name="register"] input[type="text"],
+form[name="register"] select {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 0.95rem;
+}
+
+/* Improve checkboxes/radios spacing */
+#register-container input[type="checkbox"],
+#register-container input[type="radio"],
+form[name="register"] input[type="checkbox"],
+form[name="register"] input[type="radio"] {
+  transform: scale(1.05);
+  margin-right: 6px;
+}
+
+/* Title centered & colored */
+#register-container h2, .register-wrapper h2, form[name="register"] h2 {
+  text-align: center;
+  color: var(--primary);
+  margin-top: 6px;
+  margin-bottom: 12px;
+  font-size: 1.4rem;
+}
+
+/* Submit */
+#register-container input[type="submit"], .register-wrapper .btn-submit, form[name="register"] input[type="submit"] {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin: 10px 0;
+  box-shadow: 0 6px 16px rgba(11,138,114,0.12);
+}
+
+/* Make form sections more distinct */
+#register-container fieldset, .register-wrapper fieldset, form[name="register"] fieldset {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.98);
+}
+
+/* make the form comfortable on small screens */
+@media (max-width: 700px){
+  #register-container td, .register-wrapper td, form[name="register"] td { display:block; width:100%; }
+  #register-container tr, .register-wrapper tr, form[name="register"] tr { display:block; }
+  #register-container table, .register-wrapper table, form[name="register"] table { display:block; }
+}
