@@ -265,12 +265,47 @@
           </label>
         </fieldset>
 
-        <fieldset>
-          <label>
-            <input type="checkbox" id="privacyCheck" required />
-            I agree to the <a href="#" onclick="togglePrivacyAgreement(event)">Privacy Agreement</a>
+        <!-- START SNIPPET: privacy consent -->
+        <div class="privacy-accept" style="margin-top:10px;">
+          <label style="display:flex;align-items:flex-start;gap:10px;line-height:1.3;">
+            <input id="privacy_agree" name="privacy_agree" type="checkbox" required="" aria-required="true">
+            <span>
+              I have read and agree to the
+              <a href="/public/privacy.html" target="_blank" rel="noopener noreferrer">Privacy and Data Use Agreement</a>
+              for the Barangay Commonwealth benefits &amp; livelihood program.
+            </span>
           </label>
-        </fieldset>
+
+          <!-- Hidden fields recorded with the form submission for audit -->
+          <input type="hidden" name="privacy_accepted_at" id="privacy_accepted_at" value="">
+          <input type="hidden" name="privacy_version" id="privacy_version" value="v1.0">
+        </div>
+
+        <script>
+        (function(){
+          var checkbox = document.getElementById('privacy_agree');
+          var tsField = document.getElementById('privacy_accepted_at');
+          checkbox && checkbox.addEventListener('change', function(){
+            if (checkbox.checked) {
+              tsField.value = new Date().toISOString();
+            } else {
+              tsField.value = "";
+            }
+          });
+
+          var form = document.querySelector('form');
+          form && form.addEventListener('submit', function(ev){
+            if (!checkbox.checked) {
+              ev.preventDefault();
+              checkbox.focus();
+              alert('You must read and accept the Privacy and Data Use Agreement to register.');
+              return false;
+            }
+            if (!tsField.value) tsField.value = new Date().toISOString();
+          });
+        })();
+        </script>
+        <!-- END SNIPPET -->
 
         <button class="btn" id="submitSignUp" type="submit">Sign Up</button>
       </form>
