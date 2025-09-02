@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Allow clients to write only non-consent profile fields (email, displayName, profilePicture as example)
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        // allowed client keys (adjust as needed)
+        && (request.resource.data.keys().hasOnly(['email','displayName','profilePicture','phone'])
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','profilePicture','phone']));
+
+      // Prevent clients from setting privacy_accepted_at, privacy_version, consent_grace_expires, deleted_due_to_missing_consent
+      // These fields must be written by trusted server code (admin SDK) which bypasses rules.
+
+      allow delete: if false;
+    }
+
+    match /user_privacy_consents/{doc} {
+      // Audit collection is server-only; deny client access
+      allow read, write: if false;
+    }
+
+    match /user_creation_audit/{doc} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
