@@ -1,26 +1,100 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
 :root{
   --primary: #0b8a72;
+  --primary-light: #10a382;
+  --primary-dark: #085a4e;
+  --secondary: #f0f9f7;
+  --accent: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
   --muted: #6b7280;
-  --card-bg: rgba(255,255,255,0.96);
-  --border: #e6e9ee;
-  --radius: 10px;
-  --shadow: 0 8px 24px rgba(11,138,114,0.10);
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --card-bg: rgba(255,255,255,0.98);
+  --border: #e5e7eb;
+  --border-focus: #0b8a72;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 25px -5px rgba(11,138,114,0.1), 0 8px 10px -6px rgba(11,138,114,0.1);
+  --shadow-hover: 0 20px 35px -5px rgba(11,138,114,0.15), 0 10px 15px -6px rgba(11,138,114,0.1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body { font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+body { 
+  font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, Arial; 
+  color: var(--text-primary);
+  line-height: 1.6;
+}
 
-/* container that surrounds the whole form (adjust selector to your page) */
-#register-container, .register-wrapper, form[name="register"] {
-  max-width: 920px;
-  margin: 22px auto;
-  padding: 22px;
+/* Enhanced form container styling */
+#signup .form-wrapper, #register-container, .register-wrapper, form[name="register"] {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 40px 35px;
   background: var(--card-bg) !important;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(11,138,114,0.08);
+  font-size: 15px;
+  transition: var(--transition);
+}
+
+#signup .form-wrapper:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* Modern fieldset styling with better spacing */
+#signup fieldset,
+#register-container fieldset, 
+.register-wrapper fieldset, 
+form[name="register"] fieldset {
+  border: 2px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  padding: 25px 20px;
+  margin-bottom: 25px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(240,249,247,0.4) 100%);
+  transition: var(--transition);
+  position: relative;
+}
+
+#signup fieldset:hover,
+#register-container fieldset:hover, 
+.register-wrapper fieldset:hover, 
+form[name="register"] fieldset:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(11,138,114,0.1);
+}
+
+/* Enhanced legend styling */
+#signup legend,
+#register-container legend, 
+.register-wrapper legend {
+  color: var(--primary);
+  font-weight: 600;
+  padding: 8px 16px;
+  font-size: 1.1rem;
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--primary);
+  margin-bottom: 15px;
+  position: relative;
+}
+
+/* Modern label styling with spacing */
+#signup label,
+#register-container label, 
+.register-wrapper label, 
+form[name="register"] label {
+  display: block;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: var(--text-primary);
   font-size: 14px;
+  position: relative;
 }
 
 /* make table full width and remove very visible borders */
@@ -43,56 +117,309 @@ body { font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, Ari
   padding: 0 6px;
 }
 
-/* Inputs */
+/* Modern input styling with icons and enhanced UX */
+#signup input[type="text"],
+#signup input[type="email"],
+#signup input[type="password"],
+#signup input[type="date"],
+#signup input[type="tel"],
+#signup input[type="number"],
+#signup select,
 #register-container input[type="text"],
 #register-container input[type="email"],
+#register-container input[type="password"],
 #register-container input[type="date"],
+#register-container input[type="tel"],
+#register-container input[type="number"],
 #register-container select,
 .register-wrapper input[type="text"],
+.register-wrapper input[type="email"],
+.register-wrapper input[type="password"],
+.register-wrapper input[type="date"],
+.register-wrapper input[type="tel"],
+.register-wrapper input[type="number"],
 .register-wrapper select,
 form[name="register"] input[type="text"],
+form[name="register"] input[type="email"],
+form[name="register"] input[type="password"],
+form[name="register"] input[type="date"],
+form[name="register"] input[type="tel"],
+form[name="register"] input[type="number"],
 form[name="register"] select {
   width: 100%;
-  padding: 9px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: #fff;
-  font-size: 0.95rem;
+  padding: 14px 16px 14px 45px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: #ffffff;
+  font-size: 15px;
+  font-family: inherit;
+  transition: var(--transition);
+  margin-top: 8px;
+  position: relative;
+  box-sizing: border-box;
 }
 
-/* Improve checkboxes/radios spacing */
+/* Icon styling for inputs */
+#signup label::before,
+#register-container label::before,
+.register-wrapper label::before,
+form[name="register"] label::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 38px;
+  width: 20px;
+  height: 20px;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.6;
+  z-index: 1;
+  transition: var(--transition);
+}
+
+/* Specific icons for different field types */
+#signup label:has(input[id*="Name"])::before,
+#register-container label:has(input[id*="Name"])::before { 
+  content: "👤";
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#signup label:has(input[type="email"])::before,
+#register-container label:has(input[type="email"])::before { 
+  content: "📧";
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#signup label:has(input[type="password"])::before,
+#register-container label:has(input[type="password"])::before { 
+  content: "🔒";
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#signup label:has(input[type="tel"])::before,
+#register-container label:has(input[type="tel"])::before { 
+  content: "📱";
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#signup label:has(input[type="date"])::before,
+#register-container label:has(input[type="date"])::before { 
+  content: "📅";
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#signup label:has(input[id*="username"])::before,
+#register-container label:has(input[id*="username"])::before { 
+  content: "👤";
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input focus states */
+#signup input:focus,
+#signup select:focus,
+#register-container input:focus,
+#register-container select:focus,
+.register-wrapper input:focus,
+.register-wrapper select:focus,
+form[name="register"] input:focus,
+form[name="register"] select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(11,138,114,0.1);
+  transform: translateY(-1px);
+}
+
+#signup input:focus + label::before,
+#signup select:focus + label::before,
+#register-container input:focus + label::before,
+#register-container select:focus + label::before {
+  opacity: 1;
+  color: var(--primary);
+}
+
+/* Enhanced checkbox and radio styling */
+#signup input[type="checkbox"],
+#signup input[type="radio"],
 #register-container input[type="checkbox"],
 #register-container input[type="radio"],
 form[name="register"] input[type="checkbox"],
 form[name="register"] input[type="radio"] {
-  transform: scale(1.05);
-  margin-right: 6px;
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  margin-top: 0;
+  transform: none;
+  accent-color: var(--primary);
+  cursor: pointer;
 }
 
-/* Title centered & colored */
-#register-container h2, .register-wrapper h2, form[name="register"] h2 {
+/* Checkbox/radio labels */
+#signup label:has(input[type="checkbox"]),
+#signup label:has(input[type="radio"]),
+#register-container label:has(input[type="checkbox"]),
+#register-container label:has(input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#signup label:has(input[type="checkbox"])::before,
+#signup label:has(input[type="radio"])::before,
+#register-container label:has(input[type="checkbox"])::before,
+#register-container label:has(input[type="radio"])::before {
+  display: none;
+}
+
+/* File input styling */
+#signup input[type="file"],
+#register-container input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--secondary);
+  margin-top: 8px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+#signup input[type="file"]:hover,
+#register-container input[type="file"]:hover {
+  border-color: var(--primary);
+  background: rgba(11,138,114,0.05);
+}
+
+/* Title styling */
+#signup h2,
+#register-container h2, 
+.register-wrapper h2, 
+form[name="register"] h2 {
   text-align: center;
   color: var(--primary);
-  margin-top: 6px;
-  margin-bottom: 12px;
-  font-size: 1.4rem;
+  margin: 0 0 30px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  position: relative;
 }
 
-/* Submit */
-#register-container input[type="submit"], .register-wrapper .btn-submit, form[name="register"] input[type="submit"] {
-  display: inline-block;
-  background: var(--primary);
+#signup h2::after,
+#register-container h2::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  border-radius: 2px;
+}
+
+/* Modern submit button */
+#signup .btn,
+#signup button[type="submit"],
+#register-container input[type="submit"], 
+.register-wrapper .btn-submit, 
+form[name="register"] input[type="submit"] {
+  display: block;
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: #fff;
-  padding: 10px 16px;
+  padding: 16px 24px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
-  margin: 10px 0;
-  box-shadow: 0 6px 16px rgba(11,138,114,0.12);
+  font-size: 16px;
+  margin: 30px 0 20px 0;
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(11,138,114,0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Make form sections more distinct */
+#signup .btn:hover,
+#signup button[type="submit"]:hover,
+#register-container input[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(11,138,114,0.4);
+}
+
+#signup .btn:active,
+#signup button[type="submit"]:active,
+#register-container input[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Success and error message styling */
+.messageDiv {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-weight: 500;
+  text-align: center;
+  display: none;
+}
+
+.messageDiv.error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.messageDiv.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Validation styling */
+.field-error {
+  border-color: var(--error) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.field-success {
+  border-color: var(--success) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.error-text {
+  color: var(--error);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+.success-text {
+  color: var(--success);
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Remove old fieldset and table styling */
 #register-container fieldset, .register-wrapper fieldset, form[name="register"] fieldset {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -101,9 +428,132 @@ form[name="register"] input[type="radio"] {
   background: rgba(255,255,255,0.98);
 }
 
-/* make the form comfortable on small screens */
-@media (max-width: 700px){
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+  #signup .form-wrapper,
+  #register-container, 
+  .register-wrapper, 
+  form[name="register"] {
+    margin: 20px 15px;
+    padding: 25px 20px;
+    max-width: none;
+  }
+  
+  #signup fieldset,
+  #register-container fieldset, 
+  .register-wrapper fieldset {
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+  
+  #signup h2,
+  #register-container h2 {
+    font-size: 1.6rem;
+  }
+  
+  #signup input,
+  #signup select,
+  #register-container input,
+  #register-container select {
+    padding: 12px 14px 12px 40px;
+    font-size: 14px;
+  }
+  
+  #signup label::before,
+  #register-container label::before {
+    left: 14px;
+    top: 36px;
+  }
+  
   #register-container td, .register-wrapper td, form[name="register"] td { display:block; width:100%; }
   #register-container tr, .register-wrapper tr, form[name="register"] tr { display:block; }
   #register-container table, .register-wrapper table, form[name="register"] table { display:block; }
+}
+
+@media (max-width: 480px) {
+  #signup .form-wrapper,
+  #register-container {
+    margin: 15px 10px;
+    padding: 20px 15px;
+  }
+  
+  #signup fieldset,
+  #register-container fieldset {
+    padding: 15px 12px;
+  }
+}
+
+/* Loading state for submit button */
+#signup .btn.loading,
+#register-container input[type="submit"].loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  position: relative;
+}
+
+#signup .btn.loading::after,
+#register-container input[type="submit"].loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Privacy agreement link styling */
+#signup a,
+#register-container a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+#signup a:hover,
+#register-container a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* Alt links styling */
+#signup .alt-links,
+.alt-links {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+#signup .alt-links p {
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+#signup .alt-links button {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: var(--transition);
+  text-decoration: underline;
+}
+
+#signup .alt-links button:hover {
+  color: var(--primary-dark);
 }

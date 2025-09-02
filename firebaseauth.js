@@ -187,6 +187,7 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
   try {
     const email = getValue("rEmail");
     const password = document.getElementById("rPassword")?.value ?? "";
+    const username = getValue("username");
     // Personal fields
     const firstName = getValue("fName");
     const dontHaveMiddle = getChecked("dontHaveMiddleName");
@@ -256,6 +257,7 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
 
     const memberData = {
       email,
+      username,
       firstName,
       lastName,
       middleName,
@@ -300,8 +302,12 @@ document.getElementById("submitSignUp")?.addEventListener("click", async (event)
     await setDoc(doc(db, "members", user.uid), memberData);
 
     // show success message and redirect so the user can see it
-    showMessage("Registration successful! Redirecting...", "signUpMessage");
-    await delay(1400);
+    if (typeof window.showRegistrationSuccess === 'function') {
+      window.showRegistrationSuccess("Registration successful! Redirecting to your dashboard...");
+    } else {
+      showMessage("Registration successful! Redirecting...", "signUpMessage");
+    }
+    await delay(2000);
     window.location.href = "user-dashboard.html";
   } catch (error) {
     console.error("Sign-Up Error:", error);
