@@ -7,106 +7,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #f4f7fa;
-            margin: 0;
-        }
-        .header {
-            background-color: #134b62;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .header .logo {
-            display: flex;
-            align-items: center;
-        }
-        .header .logo img {
-            height: 60px;
-            margin-right: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #134b62;
-            margin-bottom: 20px;
+        /* Minimal custom styles, main look is now in style.css */
+        .privacy-link {
+            margin-top: 10px;
             text-align: center;
         }
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px 16px;
+        .privacy-link a {
+            color: #134b62;
+            text-decoration: underline;
+            font-size: 1em;
         }
-        .form-group {
-            flex: 1 1 45%;
-            display: flex;
-            flex-direction: column;
-        }
-        .form-group.full {
-            flex: 1 1 100%;
-        }
-        label {
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-        input, select {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            margin-top: 8px;
-        }
-        .note {
-            margin: 20px 0 0 0;
-            color: #333;
-            font-size: 0.98em;
-        }
-        .btn {
-            background-color: #134b62;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 18px;
-            width: 100%;
-            transition: background 0.2s;
-        }
-        .btn:hover {
-            background-color: #0b3444;
-        }
-        .error-message {
-            color: #d32f2f;
-            background: #ffeaea;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            display: none;
-        }
-        @media (max-width: 700px) {
-            .container {
-                padding: 10px;
-            }
-            form {
-                gap: 16px 0px;
-            }
-            .form-group {
-                flex: 1 1 100%;
-            }
+        .privacy-link a:hover {
+            color: #00796b;
         }
     </style>
 </head>
@@ -222,6 +134,11 @@
             </div>
             <button type="submit" class="btn">Register</button>
         </form>
+        <div class="privacy-link">
+            <a href="privacy-agreement.html" target="_blank">
+                View Privacy Agreement
+            </a>
+        </div>
         <div class="note">
             Note: To edit your information, please proceed to QCitizen ID eApplication.
         </div>
@@ -300,7 +217,7 @@
                     // Add user to Firestore
                     await db.collection("users").add(userData);
 
-                    // Show success and redirect
+                    // Show success and redirect to Privacy Agreement
                     alert("Registration successful!");
                     window.location.href = "privacy-agreement.html";
                 } catch (error) {
