@@ -96,6 +96,16 @@
             border-radius: 6px;
             margin-bottom: 12px;
             display: none;
+            text-align: center;
+        }
+        .success-message {
+            color: #134b62;
+            background: #eaf7ea;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: none;
+            text-align: center;
         }
         .privacy-link {
             margin-top: 10px;
@@ -133,6 +143,7 @@
     <div class="container">
         <h2>Resident Registration</h2>
         <div id="signUpMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
         <form id="registerForm" autocomplete="off">
             <div class="form-group">
                 <label for="firstName">*First Name:</label>
@@ -261,24 +272,27 @@
         // Registration logic with Firebase
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById('registerForm');
-            const messageDiv = document.getElementById('signUpMessage');
+            const errorDiv = document.getElementById('signUpMessage');
+            const successDiv = document.getElementById('successMessage');
 
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                messageDiv.style.display = "none";
-                messageDiv.innerText = "";
+                errorDiv.style.display = "none";
+                errorDiv.innerText = "";
+                successDiv.style.display = "none";
+                successDiv.innerText = "";
 
                 const barangay = document.getElementById('barangay').value;
                 const fileInput = document.getElementById('validDocument');
                 if (barangay !== "COMMONWEALTH") {
-                    messageDiv.innerText = "Only residents of Barangay Commonwealth can register.";
-                    messageDiv.style.display = "block";
+                    errorDiv.innerText = "Only residents of Barangay Commonwealth can register.";
+                    errorDiv.style.display = "block";
                     return;
                 }
 
                 if (fileInput.files.length === 0) {
-                    messageDiv.innerText = "You must upload a valid ID or birth certificate.";
-                    messageDiv.style.display = "block";
+                    errorDiv.innerText = "You must upload a valid ID or birth certificate.";
+                    errorDiv.style.display = "block";
                     return;
                 }
 
@@ -300,8 +314,13 @@
                     occupation: form.occupation.value.trim(),
                 };
 
-                // Firebase logic (requires firebaseauth.js setup)
                 try {
+                    // Show loading message
+                    successDiv.innerText = "Registering, please wait...";
+                    successDiv.style.display = "block";
+                    successDiv.style.background = "#eaf7ea";
+                    successDiv.style.color = "#134b62";
+
                     // Save user to Firestore
                     const app = window.firebaseApp;
                     const db = window.db;
@@ -317,12 +336,20 @@
                     // Add user to Firestore
                     await db.collection("users").add(userData);
 
-                    // Show success and redirect to Privacy Agreement
-                    alert("Registration successful!");
-                    window.location.href = "https://brgycommonwealthportal.netlify.app/privacy-agreement.html";
+                    // Show success message and redirect after 2 seconds
+                    successDiv.innerText = "Registration successful! Redirecting to Privacy Agreement...";
+                    successDiv.style.display = "block";
+                    successDiv.style.background = "#eaf7ea";
+                    successDiv.style.color = "#134b62";
+                    setTimeout(function() {
+                        window.location.href = "https://brgycommonwealthportal.netlify.app/privacy-agreement.html";
+                    }, 2000);
                 } catch (error) {
-                    messageDiv.innerText = "An error occurred during registration. Please try again.";
-                    messageDiv.style.display = "block";
+                    errorDiv.innerText = "An error occurred during registration. Please try again.";
+                    errorDiv.style.display = "block";
+                    errorDiv.style.background = "#ffeaea";
+                    errorDiv.style.color = "#d32f2f";
+                    successDiv.style.display = "none";
                     console.error(error);
                 }
             });
