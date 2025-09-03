@@ -169,3 +169,105 @@ export async function registerMember(form, errorDivId, successDivId) {
     successDiv.style.display = "none";
   }
 }
+
+// Login logic for login.html
+export async function loginMember(form, messageDivId) {
+  const messageDiv = document.getElementById(messageDivId);
+  
+  // Hide previous messages and reset classes
+  messageDiv.style.display = "none";
+  messageDiv.innerText = "";
+  messageDiv.classList.remove("error", "success");
+  
+  // Get form values
+  const email = form.email.value.trim();
+  const password = form.password.value;
+  
+  // Validation
+  if (!email || !email.includes("@")) {
+    messageDiv.innerText = "Please enter a valid email address.";
+    messageDiv.classList.add("error");
+    messageDiv.style.display = "block";
+    return;
+  }
+  if (!password) {
+    messageDiv.innerText = "Please enter your password.";
+    messageDiv.classList.add("error");
+    messageDiv.style.display = "block";
+    return;
+  }
+  
+  try {
+    // Show loading
+    messageDiv.innerText = "Signing in, please wait...";
+    messageDiv.classList.add("success");
+    messageDiv.style.display = "block";
+    
+    // Disable submit button
+    const submitBtn = form.querySelector('#submitSignIn');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Signing in...";
+    
+    // Firebase Auth: sign in user
+    const signInResult = await signInWithEmailAndPassword(auth, email, password);
+    const user = signInResult.user;
+    
+    // Check if user exists in Firestore
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    
+    if (!userDoc.exists()) {
+      // User doesn't exist in our database
+      throw new Error("Account not found. Please register first.");
+    }
+    
+    const userData = userDoc.data();
+    
+    // Check if user is from Commonwealth barangay
+    if (userData.barangay !== "COMMONWEALTH") {
+      throw new Error("Access denied. Only Commonwealth residents can access this portal.");
+    }
+    
+    // Show success and redirect
+    messageDiv.innerText = "Sign in successful! Redirecting...";
+    messageDiv.classList.remove("error");
+    messageDiv.classList.add("success");
+    messageDiv.style.display = "block";
+    
+    setTimeout(function() {
+      // Redirect based on user role
+      if (userData.role === "admin") {
+        window.location.href = "admin-dashboard.html";
+      } else {
+        window.location.href = "user-dashboard.html";
+      }
+    }, 1500);
+    
+  } catch (error) {
+    // Re-enable submit button
+    const submitBtn = form.querySelector('#submitSignIn');
+    submitBtn.disabled = false;
+    submitBtn.innerText = "Sign In";
+    
+    // Show error message
+    let errorMessage = "Sign in failed. Please try again.";
+    
+    if (error.code === "auth/user-not-found") {
+      errorMessage = "No account found with this email address.";
+    } else if (error.code === "auth/wrong-password") {
+      errorMessage = "Incorrect password. Please try again.";
+    } else if (error.code === "auth/invalid-email") {
+      errorMessage = "Invalid email address format.";
+    } else if (error.code === "auth/user-disabled") {
+      errorMessage = "This account has been disabled.";
+    } else if (error.code === "auth/too-many-requests") {
+      errorMessage = "Too many failed attempts. Please try again later.";
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    messageDiv.innerText = errorMessage;
+    messageDiv.classList.remove("success");
+    messageDiv.classList.add("error");
+    messageDiv.style.display = "block";
+  }
+}

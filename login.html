@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In - Barangay Commonwealth Portal</title>
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="firebaseauth.js"></script>
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 60px auto;
+      padding: 40px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .login-title {
+      color: #134b62;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2em;
+      font-weight: 600;
+    }
+    
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .input-group {
+      position: relative;
+    }
+    
+    .input-group i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    
+    .input-group input:focus {
+      outline: none;
+      border-color: #134b62;
+      box-shadow: 0 0 0 2px rgba(19, 75, 98, 0.1);
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #666;
+    }
+    
+    .toggle-password:hover {
+      color: #134b62;
+    }
+    
+    .recover {
+      text-align: center;
+      margin: 10px 0;
+    }
+    
+    .recover a {
+      color: #134b62;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+    
+    .recover a:hover {
+      text-decoration: underline;
+    }
+    
+    .btn {
+      background-color: #134b62;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: #0b3444;
+    }
+    
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .messageDiv {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: none;
+      text-align: center;
+    }
+    
+    .messageDiv.error {
+      background-color: #ffeaea;
+      color: #d32f2f;
+      border: 1px solid #ffcdd2;
+    }
+    
+    .messageDiv.success {
+      background-color: #eaf7ea;
+      color: #134b62;
+      border: 1px solid #c8e6c9;
+    }
+    
+    .alt-links {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    
+    .alt-links p {
+      margin-bottom: 10px;
+      color: #666;
+    }
+    
+    .alt-links a {
+      color: #134b62;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .alt-links a:hover {
+      text-decoration: underline;
+    }
+    
+    .back-to-home {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .back-to-home a {
+      color: #134b62;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9em;
+    }
+    
+    .back-to-home a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 500px) {
+      .login-container {
+        margin: 20px;
+        padding: 30px 20px;
+      }
+      
+      .login-title {
+        font-size: 1.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="toggle-theme" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <i class="fas fa-moon" aria-hidden="true"></i>
+  </button>
+
+  <header>
+    <span aria-label="Site Title">Barangay Commonwealth Portal</span>
+  </header>
+
+  <main class="container" role="main">
+    <div class="login-container">
+      <div class="back-to-home">
+        <a href="index.html">
+          <i class="fas fa-arrow-left"></i>
+          Back to Home
+        </a>
+      </div>
+      
+      <h2 class="login-title">Sign In</h2>
+      
+      <form id="loginForm" class="login-form">
+        <div id="signInMessage" class="messageDiv"></div>
+        
+        <div class="input-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="email" placeholder="Email" required />
+        </div>
+        
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="password" placeholder="Password" required />
+          <i class="fas fa-eye toggle-password"></i>
+        </div>
+        
+        <p class="recover"><a href="#">Recover Password</a></p>
+        
+        <button class="btn" id="submitSignIn" type="submit">Sign In</button>
+      </form>
+
+      <div class="alt-links">
+        <p>Don't have an account?</p>
+        <a href="register.html">Sign Up</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      const icon = document.querySelector('.toggle-theme i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+    }
+
+    // Password toggle logic
+    document.querySelector('.toggle-password').addEventListener('click', function() {
+      const input = this.previousElementSibling;
+      if (input.type === 'password') {
+        input.type = 'text';
+        this.classList.remove('fa-eye');
+        this.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        this.classList.remove('fa-eye-slash');
+        this.classList.add('fa-eye');
+      }
+    });
+
+    // Login form handler
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById('loginForm');
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        
+        // Import and call login function
+        const { loginMember } = await import('./firebaseauth.js');
+        await loginMember(form, "signInMessage");
+      });
+    });
+  </script>
+
+</body>
+</html>

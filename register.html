@@ -119,6 +119,21 @@
         .privacy-link a:hover {
             color: #00796b;
         }
+        .back-to-home {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .back-to-home a {
+            color: #134b62;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+        .back-to-home a:hover {
+            text-decoration: underline;
+        }
         @media (max-width: 700px) {
             .container {
                 padding: 10px;
@@ -141,6 +156,12 @@
         <span id="dateTime"></span>
     </div>
     <div class="container">
+        <div class="back-to-home">
+            <a href="index.html">
+                <i class="fas fa-arrow-left"></i>
+                Back to Home
+            </a>
+        </div>
         <h2>Resident Registration</h2>
         <div id="signUpMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
@@ -256,6 +277,9 @@
         </div>
         <div class="note">
             Note: To edit your information, please proceed to QCitizen ID eApplication.
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+            <p>Already have an account? <a href="login.html" style="color: #134b62; text-decoration: none; font-weight: 500;">Sign In</a></p>
         </div>
     </div>
     <script type="module">
