@@ -199,12 +199,12 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="email">*Email Address:</label>
-                <input type="email" id="email" name="email" required />
+                <label for="email">*Email Address (Username):</label>
+                <input type="email" id="email" name="email" required autocomplete="username" />
             </div>
             <div class="form-group">
                 <label for="password">*Password:</label>
-                <input type="password" id="password" name="password" required minlength="6" />
+                <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password" />
             </div>
             <div class="form-group">
                 <label for="mobileNumber">*Mobile Number:</label>
@@ -289,6 +289,7 @@
                 const barangay = document.getElementById('barangay').value;
                 const fileInput = document.getElementById('validDocument');
                 const password = form.password.value;
+                const email = form.email.value;
 
                 if (barangay !== "COMMONWEALTH") {
                     errorDiv.innerText = "Only residents of Barangay Commonwealth can register.";
@@ -308,6 +309,12 @@
                     return;
                 }
 
+                if (!email || !email.includes("@")) {
+                    errorDiv.innerText = "A valid email address is required.";
+                    errorDiv.style.display = "block";
+                    return;
+                }
+
                 // Collect form data
                 const userData = {
                     firstName: form.firstName.value.trim(),
@@ -316,7 +323,7 @@
                     suffix: form.suffix.value,
                     birthDate: `${form.birthMonth.value} ${form.birthDay.value}, ${form.birthYear.value}`,
                     sex: form.sex.value,
-                    email: form.email.value.trim(),
+                    email: email.trim(),
                     mobileNumber: form.mobileNumber.value.trim(),
                     city: form.city.value,
                     barangay: form.barangay.value,
@@ -334,7 +341,7 @@
                     successDiv.style.color = "#134b62";
 
                     // Firebase Authentication: create user
-                    await firebase.auth().createUserWithEmailAndPassword(userData.email, password);
+                    await firebase.auth().createUserWithEmailAndPassword(email, password);
 
                     // Upload document to Firebase Storage
                     const storageRef = window.storageRef;
