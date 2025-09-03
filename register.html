@@ -171,7 +171,7 @@
             <div class="form-group">
                 <label>*Birth Date:</label>
                 <div style="display:flex;gap:8px;">
-                    <select id="birthMonth" required style="flex:1;">
+                    <select id="birthMonth" name="birthMonth" required style="flex:1;">
                         <option value="">Month</option>
                         <option>JANUARY</option>
                         <option>FEBRUARY</option>
@@ -186,8 +186,8 @@
                         <option>NOVEMBER</option>
                         <option>DECEMBER</option>
                     </select>
-                    <input type="number" id="birthDay" min="1" max="31" required placeholder="Day" style="flex:1;" />
-                    <input type="number" id="birthYear" min="1900" max="2025" required placeholder="Year" style="flex:1;" />
+                    <input type="number" id="birthDay" name="birthDay" min="1" max="31" required placeholder="Day" style="flex:1;" />
+                    <input type="number" id="birthYear" name="birthYear" min="1900" max="2025" required placeholder="Year" style="flex:1;" />
                 </div>
             </div>
             <div class="form-group">
@@ -258,9 +258,9 @@
             Note: To edit your information, please proceed to QCitizen ID eApplication.
         </div>
     </div>
-    <script src="firebaseauth.js"></script>
-    <script src="register-validation.js"></script>
-    <script>
+    <script type="module">
+        import { registerMember } from './firebaseauth.js';
+
         // Show current date and time
         function updateDateTime() {
             const dt = new Date();
@@ -273,105 +273,12 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // Registration logic with Firebase
+        // Registration form handler
         document.addEventListener("DOMContentLoaded", function () {
             const form = document.getElementById('registerForm');
-            const errorDiv = document.getElementById('signUpMessage');
-            const successDiv = document.getElementById('successMessage');
-
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                errorDiv.style.display = "none";
-                errorDiv.innerText = "";
-                successDiv.style.display = "none";
-                successDiv.innerText = "";
-
-                const barangay = document.getElementById('barangay').value;
-                const fileInput = document.getElementById('validDocument');
-                const password = form.password.value;
-                const email = form.email.value;
-
-                if (barangay !== "COMMONWEALTH") {
-                    errorDiv.innerText = "Only residents of Barangay Commonwealth can register.";
-                    errorDiv.style.display = "block";
-                    return;
-                }
-
-                if (fileInput.files.length === 0) {
-                    errorDiv.innerText = "You must upload a valid ID or birth certificate.";
-                    errorDiv.style.display = "block";
-                    return;
-                }
-
-                if (!password || password.length < 6) {
-                    errorDiv.innerText = "Password is required and must be at least 6 characters.";
-                    errorDiv.style.display = "block";
-                    return;
-                }
-
-                if (!email || !email.includes("@")) {
-                    errorDiv.innerText = "A valid email address is required.";
-                    errorDiv.style.display = "block";
-                    return;
-                }
-
-                // Collect form data
-                const userData = {
-                    firstName: form.firstName.value.trim(),
-                    lastName: form.lastName.value.trim(),
-                    middleName: form.middleName.value.trim(),
-                    suffix: form.suffix.value,
-                    birthDate: `${form.birthMonth.value} ${form.birthDay.value}, ${form.birthYear.value}`,
-                    sex: form.sex.value,
-                    email: email.trim(),
-                    mobileNumber: form.mobileNumber.value.trim(),
-                    city: form.city.value,
-                    barangay: form.barangay.value,
-                    houseNumber: form.houseNumber.value.trim(),
-                    street: form.street.value.trim(),
-                    workingInQC: form.workingInQC.value,
-                    occupation: form.occupation.value.trim(),
-                };
-
-                try {
-                    // Show loading message
-                    successDiv.innerText = "Registering, please wait...";
-                    successDiv.style.display = "block";
-                    successDiv.style.background = "#eaf7ea";
-                    successDiv.style.color = "#134b62";
-
-                    // Firebase Authentication: create user
-                    await firebase.auth().createUserWithEmailAndPassword(email, password);
-
-                    // Upload document to Firebase Storage
-                    const storageRef = window.storageRef;
-                    const file = fileInput.files[0];
-                    const storagePath = `documents/${userData.email}_${Date.now()}_${file.name}`;
-                    const fileRef = storageRef.child(storagePath);
-                    await fileRef.put(file);
-                    const fileUrl = await fileRef.getDownloadURL();
-                    userData.validDocumentUrl = fileUrl;
-
-                    // Add user to Firestore (do NOT include password)
-                    const db = window.db;
-                    await db.collection("users").add(userData);
-
-                    // Show success message and redirect after 2 seconds
-                    successDiv.innerText = "Registration successful! Redirecting to Privacy Agreement...";
-                    successDiv.style.display = "block";
-                    successDiv.style.background = "#eaf7ea";
-                    successDiv.style.color = "#134b62";
-                    setTimeout(function() {
-                        window.location.href = "https://brgycommonwealthportal.netlify.app/privacy-agreement.html";
-                    }, 2000);
-                } catch (error) {
-                    errorDiv.innerText = "Failed to create account: " + (error.message || error);
-                    errorDiv.style.display = "block";
-                    errorDiv.style.background = "#ffeaea";
-                    errorDiv.style.color = "#d32f2f";
-                    successDiv.style.display = "none";
-                    console.error(error);
-                }
+                await registerMember(form, "signUpMessage", "successMessage");
             });
         });
     </script>
