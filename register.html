@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Resident Registration - QCe Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f4f7fa;
+            margin: 0;
+        }
+        .header {
+            background-color: #134b62;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+        .header .logo img {
+            height: 60px;
+            margin-right: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #134b62;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px 16px;
+        }
+        .form-group {
+            flex: 1 1 45%;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group.full {
+            flex: 1 1 100%;
+        }
+        label {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        .note {
+            margin: 20px 0 0 0;
+            color: #333;
+            font-size: 0.98em;
+        }
+        .btn {
+            background-color: #134b62;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 18px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: #0b3444;
+        }
+        .error-message {
+            color: #d32f2f;
+            background: #ffeaea;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 10px;
+            }
+            form {
+                gap: 16px 0px;
+            }
+            .form-group {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/29/Quezon_City_Seal.png" alt="Quezon City Seal"/>
+            <span style="font-size:1.45em;font-weight:600;">QCe Services</span>
+        </div>
+        <span id="dateTime"></span>
+    </div>
+    <div class="container">
+        <h2>Resident Registration</h2>
+        <div id="signUpMessage" class="error-message"></div>
+        <form id="registerForm" autocomplete="off">
+            <div class="form-group">
+                <label for="firstName">*First Name:</label>
+                <input type="text" id="firstName" name="firstName" required />
+            </div>
+            <div class="form-group">
+                <label for="lastName">*Last Name:</label>
+                <input type="text" id="lastName" name="lastName" required />
+            </div>
+            <div class="form-group">
+                <label for="middleName">Middle Name: (Optional)</label>
+                <input type="text" id="middleName" name="middleName" />
+            </div>
+            <div class="form-group">
+                <label for="suffix">Suffix:</label>
+                <select id="suffix" name="suffix">
+                    <option value="">-- Select --</option>
+                    <option value="Jr">Jr</option>
+                    <option value="Sr">Sr</option>
+                    <option value="I">I</option>
+                    <option value="II">II</option>
+                    <option value="III">III</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>*Birth Date:</label>
+                <div style="display:flex;gap:8px;">
+                    <select id="birthMonth" required style="flex:1;">
+                        <option value="">Month</option>
+                        <option>JANUARY</option>
+                        <option>FEBRUARY</option>
+                        <option>MARCH</option>
+                        <option>APRIL</option>
+                        <option>MAY</option>
+                        <option>JUNE</option>
+                        <option>JULY</option>
+                        <option>AUGUST</option>
+                        <option>SEPTEMBER</option>
+                        <option>OCTOBER</option>
+                        <option>NOVEMBER</option>
+                        <option>DECEMBER</option>
+                    </select>
+                    <input type="number" id="birthDay" min="1" max="31" required placeholder="Day" style="flex:1;" />
+                    <input type="number" id="birthYear" min="1900" max="2025" required placeholder="Year" style="flex:1;" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="sex">*Sex:</label>
+                <select id="sex" name="sex" required>
+                    <option value="">-- Select --</option>
+                    <option>MALE</option>
+                    <option>FEMALE</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="email">*Email Address:</label>
+                <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+                <label for="mobileNumber">*Mobile Number:</label>
+                <input type="text" id="mobileNumber" name="mobileNumber" required maxlength="15" />
+            </div>
+            <div class="form-group">
+                <label for="city">*City:</label>
+                <select id="city" name="city" required>
+                    <option value="">-- Select --</option>
+                    <option>QUEZON CITY</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="barangay">*Barangay:</label>
+                <select id="barangay" name="barangay" required>
+                    <option value="">-- Select --</option>
+                    <option>COMMONWEALTH</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="houseNumber">House #: (Optional)</label>
+                <input type="text" id="houseNumber" name="houseNumber" />
+            </div>
+            <div class="form-group">
+                <label for="street">*Street:</label>
+                <input type="text" id="street" name="street" required />
+            </div>
+            <div class="form-group full">
+                <label>*Are you working in Quezon City?</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="workingInQC" value="Yes" required /> Yes</label>
+                    <label><input type="radio" name="workingInQC" value="No" /> No</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="occupation">Occupation:</label>
+                <input type="text" id="occupation" name="occupation" placeholder="ENTER OCCUPATION" />
+            </div>
+            <div class="form-group full">
+                <label for="validDocument">*Upload Valid ID / Birth Certificate:</label>
+                <input type="file" id="validDocument" name="validDocument" accept="image/*,application/pdf" required />
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <div class="note">
+            Note: To edit your information, please proceed to QCitizen ID eApplication.
+        </div>
+    </div>
+    <script src="firebaseauth.js"></script>
+    <script src="register-validation.js"></script>
+    <script>
+        // Show current date and time
+        function updateDateTime() {
+            const dt = new Date();
+            document.getElementById("dateTime").textContent =
+                dt.toLocaleString('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // Registration logic with Firebase
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById('registerForm');
+            const messageDiv = document.getElementById('signUpMessage');
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                messageDiv.style.display = "none";
+                messageDiv.innerText = "";
+
+                const barangay = document.getElementById('barangay').value;
+                const fileInput = document.getElementById('validDocument');
+                if (barangay !== "COMMONWEALTH") {
+                    messageDiv.innerText = "Only residents of Barangay Commonwealth can register.";
+                    messageDiv.style.display = "block";
+                    return;
+                }
+
+                if (fileInput.files.length === 0) {
+                    messageDiv.innerText = "You must upload a valid ID or birth certificate.";
+                    messageDiv.style.display = "block";
+                    return;
+                }
+
+                // Collect form data
+                const userData = {
+                    firstName: form.firstName.value.trim(),
+                    lastName: form.lastName.value.trim(),
+                    middleName: form.middleName.value.trim(),
+                    suffix: form.suffix.value,
+                    birthDate: `${form.birthMonth.value} ${form.birthDay.value}, ${form.birthYear.value}`,
+                    sex: form.sex.value,
+                    email: form.email.value.trim(),
+                    mobileNumber: form.mobileNumber.value.trim(),
+                    city: form.city.value,
+                    barangay: form.barangay.value,
+                    houseNumber: form.houseNumber.value.trim(),
+                    street: form.street.value.trim(),
+                    workingInQC: form.workingInQC.value,
+                    occupation: form.occupation.value.trim(),
+                };
+
+                // Firebase logic (requires firebaseauth.js setup)
+                try {
+                    // Save user to Firestore
+                    const app = window.firebaseApp;
+                    const db = window.db;
+                    // Upload document to Firebase Storage
+                    const storageRef = window.storageRef;
+                    const file = fileInput.files[0];
+                    const storagePath = `documents/${userData.email}_${Date.now()}_${file.name}`;
+                    const fileRef = storageRef.child(storagePath);
+                    await fileRef.put(file);
+                    const fileUrl = await fileRef.getDownloadURL();
+                    userData.validDocumentUrl = fileUrl;
+
+                    // Add user to Firestore
+                    await db.collection("users").add(userData);
+
+                    // Show success and redirect
+                    alert("Registration successful!");
+                    window.location.href = "index.html";
+                } catch (error) {
+                    messageDiv.innerText = "An error occurred during registration. Please try again.";
+                    messageDiv.style.display = "block";
+                    console.error(error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
